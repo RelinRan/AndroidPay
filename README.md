@@ -107,7 +107,8 @@ C.支付调用
         builder.build().pay();
 
 
-        //如果需要支付支付结果，需要广播接收。但是不建议这么做，最好还是后台写一个接口来判断是否支付成功，因为有时候支付广播判断有问题。
+        //如果需要支付支付结果，需要广播接收。但是不建议这么做，最好还是后台写一个接口
+	//来判断是否支付成功，因为有时候支付广播判断有问题。
     private class WxReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
