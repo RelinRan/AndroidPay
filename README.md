@@ -80,7 +80,7 @@ public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
 
     }
 }
-
+```
 B.AndroidManifest.xml配置
 
 ```
@@ -92,9 +92,6 @@ B.AndroidManifest.xml配置
             android:theme="@style/Android.Theme.Light.NoActionBar" />
 ```
 
-
-
-```
 C.支付调用
 
 ```
@@ -146,13 +143,13 @@ A.AndroidManifest.xml配置
 B.支付调用
 
 ```
-        AliPay.Builder builder = new AliPay.Builder(this);
-        builder.orderInfo(data);
-        builder.listener(new AliPayListener() {
-            @Override
-            public void aliPaySuccess(String s, String s1, String s2) {
+     AliPay.Builder builder = new AliPay.Builder(this);
+     builder.orderInfo(data);
+     builder.listener(new AliPayListener() {
+         @Override
+         public void aliPaySuccess(String s, String s1, String s2) {
                 showToast(ToastMode.SUCCEED, "支付成功");
-            }
+         }
 	    
     /**
      * 参数解释
@@ -180,23 +177,23 @@ B.支付调用
      */
 	  
 	  
-            @Override
-            public void aliPayFail(String status, String json, String description) {
-                showToast(ToastMode.FAILURE, "支付失败");
-            }
+     @Override
+     public void aliPayFail(String status, String json, String description) {
+           showToast(ToastMode.FAILURE, "支付失败");
+        }
 
-            @Override
-            public void aliPaying(String status, String json, String description) {
+        @Override
+        public void aliPaying(String status, String json, String description) {
 
-            }
-        });
-        builder.loading(true);
-        builder.build().pay();
+        }
+     });
+    builder.loading(true);
+    builder.build().pay();
 ```
 
 ####  3.银联支付
 
 ```
-        UUPay uuPay = new UUPay(this);
-        uuPay.pay(tn,UUPay.PayMode.FORM);
+    UUPay uuPay = new UUPay(this);
+    uuPay.pay(tn,UUPay.PayMode.FORM);
 ```
