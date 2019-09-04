@@ -10,6 +10,23 @@ Android支付,主要用户中国常用的微信支付、支付宝支付、银联
 
 #### 使用说明
 
+（1）在项目下的build.gradle配置如下
+
+```
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+
+（2）在项目app文件夹下的build.gradle配置如下
+```
+dependencies {
+	        implementation 'com.github.RelinRan:AndroidPay:Tag'
+	}
+```
 1. 微信支付
 A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件
 
