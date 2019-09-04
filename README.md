@@ -27,7 +27,7 @@ dependencies {
 	        implementation 'com.github.RelinRan:AndroidPay:Tag'
 	}
 ```
-1. 微信支付
+#### 1. 微信支付
 A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件
 
 ```
@@ -129,7 +129,7 @@ C.支付调用
 
 ```
 
-2. 支付宝支付
+#### 2. 支付宝支付
 
 A.AndroidManifest.xml配置
 
@@ -168,7 +168,7 @@ B.支付调用
         builder.build().pay();
 ```
 
-3.银联支付
+####  3.银联支付
 
 ```
         UUPay uuPay = new UUPay(this);
