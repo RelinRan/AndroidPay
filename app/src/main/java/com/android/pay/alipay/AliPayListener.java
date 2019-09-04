@@ -32,6 +32,9 @@ public interface AliPayListener {
      */
     public void aliPaySuccess(String status, String json, String description);
 
+
+
+
     /**
      * 支付失败
      *
