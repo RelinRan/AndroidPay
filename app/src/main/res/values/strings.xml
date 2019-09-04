@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AndroidPay</string>
+    <!--微信APP-ID-->
+    <string name="WX_APP_ID">WX_APP_ID</string>
+</resources>
