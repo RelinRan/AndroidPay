@@ -1,6 +1,4 @@
 # AndroidPay
-Android Commonly used payment in China
-# AndroidPay
 
 #### 介绍
 Android支付,主要用户中国常用的微信支付、支付宝支付、银联支付
