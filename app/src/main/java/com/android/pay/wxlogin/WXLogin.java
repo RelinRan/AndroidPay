@@ -33,7 +33,7 @@ public class WXLogin {
      */
     public final OnWXLoginListener listener;
     private LoginReceiver loginReceiver;
-    public static final String WX_LOGIN_ACTION = "com_android_pay_wx_login";
+    public static final String WX_LOGIN_ACTION = "ACTION_COM_ANDROID_PAY_WX_LOGIN";
 
 
     /**
