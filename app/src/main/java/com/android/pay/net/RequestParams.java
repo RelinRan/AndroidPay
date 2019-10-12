@@ -140,49 +140,6 @@ public class RequestParams {
         stringParams.put(key, value == null ? "" : value);
     }
 
-    /**
-     * 添加文件参数
-     * Add File Params
-     *
-     * @param key
-     * @param value
-     * @param compressedSize 压缩大小
-     */
-    public void add(String key, File value, int compressedSize) {
-        if (value == null) {
-            return;
-        }
-        if (fileParams == null) {
-            fileParams = new HashMap<>();
-        }
-        if (!value.exists()) {
-            Log.e(this.getClass().getSimpleName(), "addParams file is not exist!" + value.getAbsolutePath());
-        }
-        //压缩图片
-        String path = value.getAbsolutePath();
-        if (!TextUtils.isEmpty(path)) {
-            path = path.toUpperCase();
-        }
-        Log.e(this.getClass().getSimpleName(), "addParams value:" + path);
-        if (path.contains(".JPG") || path.contains(".JPEG")) {
-            value = IOUtils.compress(value, Bitmap.CompressFormat.JPEG, 200);
-        }
-        if (path.contains(".PNG")) {
-            value = IOUtils.compress(value, Bitmap.CompressFormat.PNG, 200);
-        }
-        fileParams.put(key, value);
-    }
-
-    /**
-     * 添加文件参数
-     * Add File Params
-     *
-     * @param key
-     * @param value
-     */
-    public void add(String key, File value) {
-        add(key, value, 200);
-    }
 
     /**
      * 添加头文件参数

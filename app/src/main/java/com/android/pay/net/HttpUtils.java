@@ -1,13 +1,12 @@
 package com.android.pay.net;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.text.TextUtils;
-
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,11 +48,6 @@ public class HttpUtils {
      * 地址对象
      */
     private static URL httpUrl;
-
-    /**
-     * Cookie对象
-     */
-    private static HttpCookie cookie;
 
     /**
      * Http异步处理
@@ -127,8 +121,6 @@ public class HttpUtils {
             if (requestMethod.equals("POST")) {
                 conn.setDoOutput(true);
             }
-            //加载缓存的Cookie
-            conn.setRequestProperty("Cookie", cookie.loadCookie(httpUrl));
             //设置请求头参数
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.setRequestProperty("Charset", "UTF-8");
@@ -216,26 +208,9 @@ public class HttpUtils {
                     }
                     //json文字参数
                     if (params.getOptionParams().get(RequestParams.REQUEST_CONTENT_TYPE).equals(RequestParams.REQUEST_CONTENT_JSON)) {
-                        String stringParams = JsonEscape.escape(JsonParser.parseMap(params.getStringParams()));
+                        String stringParams = JsonEscape.escape(HttpJson.parseMap(params.getStringParams()));
                         dos.writeBytes(stringParams);
                     }
-                }
-            }
-            //文件上传
-            if (params != null && params.getFileParams() != null) {
-                StringBuilder sb = new StringBuilder();
-                for (Map.Entry<String, File> fileEntry : params.getFileParams().entrySet()) {
-                    sb.append(buildPostFileParams(fileEntry.getKey(), fileEntry.getValue().getName()));
-                    dos.writeBytes(sb.toString());
-                    dos.flush();
-                    InputStream is = new FileInputStream(fileEntry.getValue());
-                    byte[] buffer = new byte[1024];
-                    int len = 0;
-                    while ((len = is.read(buffer)) != -1) {
-                        dos.write(buffer, 0, len);
-                    }
-                    is.close();
-                    dos.writeBytes(LINE_FEED);
                 }
             }
             //请求结束标志
@@ -270,8 +245,6 @@ public class HttpUtils {
                     code = conn.getResponseCode();
                     if (code == 200) {
                         InputStream inputStream = conn.getInputStream();
-                        //保存Cookie
-                        cookie.saveCookie(httpUrl, conn, Integer.parseInt(params.getOptionParams().get(RequestParams.COOKIE_EXPIRES_SECONDS)));
                         //获取返回数据
                         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                         String line;
@@ -302,8 +275,7 @@ public class HttpUtils {
      * @param listener 监听
      */
     public static void get(Context context, String url, RequestParams params, OnHttpListener listener) {
-        cookie = new HttpCookie(context);
-        if (!NetworkUtils.isAvailable(context)) {
+        if (!isAvailable(context)) {
             HttpResponse response = new HttpResponse();
             response.url(url);
             response.code(-11);
@@ -323,8 +295,7 @@ public class HttpUtils {
      * @param listener 监听
      */
     public static void post(Context context, String url, RequestParams params, OnHttpListener listener) {
-        cookie = new HttpCookie(context);
-        if (!NetworkUtils.isAvailable(context)) {
+        if (!isAvailable(context)) {
             HttpResponse response = new HttpResponse();
             response.url(url);
             response.code(-11);
@@ -375,6 +346,30 @@ public class HttpUtils {
         sb.append("Content-Transfer-Encoding: 8bit" + LINE_FEED);
         sb.append(LINE_FEED);// 参数头设置完以后需要两个换行，然后才是参数内容
         return sb;
+    }
+
+
+    /**
+     * 判断网络是否可用 [需要如下权限]
+     *
+     * @param context
+     * @return
+     */
+    public static boolean isAvailable(Context context) {
+        try {
+            ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (connectivity != null) {
+                NetworkInfo info = connectivity.getActiveNetworkInfo();
+                if (info != null && info.isConnected()) {
+                    if (info.getState() == NetworkInfo.State.CONNECTED) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
     }
 
 

@@ -4,11 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.pay.net.HttpResponse;
 import com.android.pay.net.HttpUtils;
-import com.android.pay.net.JsonParser;
+import com.android.pay.net.HttpJson;
 import com.android.pay.net.OnHttpListener;
 import com.android.pay.net.RequestParams;
 import com.android.pay.wxlogin.WXLogin;
@@ -24,6 +23,7 @@ import java.util.Map;
 
 public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandler, OnHttpListener {
 
+    private String TAG = "AndroidWXEntryActivity";
     private IWXAPI wxAPI;
     private static final int RETURN_MSG_TYPE_LOGIN = 1; //登录
     private static final int RETURN_MSG_TYPE_SHARE = 2; //分享
@@ -51,17 +51,21 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
 
     @Override
     public void onReq(BaseReq arg0) {
-        Log.i("WXEntryActivity", "WXEntryActivity onReq:" + arg0);
+        Log.i("WXEntryActivity", "[onReq] arg0:" + arg0);
     }
 
     @Override
     public void onResp(BaseResp resp) {
         int type = resp.getType(); //类型：分享还是登录
-        Log.i("WXEntryActivity", "onResp type:------>" + type);
+        Log.i(TAG, "[onResp] -> type:" + type);
+        Intent intent;
         switch (resp.errCode) {
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
-                Toast.makeText(this, "已拒绝授权微信登录", Toast.LENGTH_SHORT).show();
-                //拒绝授权微信登录
+                intent = new Intent(WXLogin.WX_LOGIN_ACTION);
+                intent.putExtra("code", BaseResp.ErrCode.ERR_AUTH_DENIED);
+                intent.putExtra("msg", "已拒绝授权微信登录");
+                sendBroadcast(intent);
+                Log.i(TAG, "[onResp] -> 拒绝授权微信登录");
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
                 String message = "";
@@ -70,14 +74,22 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
                 } else if (type == RETURN_MSG_TYPE_SHARE) {
                     message = "取消了微信分享";
                 }
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                intent = new Intent(WXLogin.WX_LOGIN_ACTION);
+                intent.putExtra("code", BaseResp.ErrCode.ERR_USER_CANCEL);
+                intent.putExtra("msg", "已拒绝授权微信登录");
+                sendBroadcast(intent);
+                Log.i(TAG, "[onResp] -> " + message);
                 break;
             case BaseResp.ErrCode.ERR_OK://用户同意
                 if (type == RETURN_MSG_TYPE_LOGIN) {
                     //用户换取access_token的code，仅在ErrCode为0时有效
                     String code = ((SendAuth.Resp) resp).code;
-                    Log.i("WXEntryActivity", "code:------>" + code);
+                    Log.i(TAG, "[onResp] -> 用户开始登录微信...");
                     //这里拿到了这个code，去做2次网络请求获取access_token和用户个人信息
+                    intent = new Intent(WXLogin.WX_LOGIN_ACTION);
+                    intent.putExtra("code", BaseResp.ErrCode.ERR_OK);
+                    intent.putExtra("msg", "用户开始登录微信");
+                    sendBroadcast(intent);
                     getAccessToken(code);
                 } else if (type == RETURN_MSG_TYPE_SHARE) {
                     //微信分享成功
@@ -111,7 +123,7 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
     @Override
     public void onHttpSucceed(HttpResponse result) {
         if (result.url().contains("access_token")) {
-            Map<String, String> accessData = JsonParser.parseJSONObject(result.body());
+            Map<String, String> accessData = HttpJson.parseJSONObject(result.body());
             access_token = accessData.get("access_token");
             openid = accessData.get("openid");
             String expires_in = accessData.get("expires_in");
@@ -129,7 +141,7 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
             getUserInfo(access_token, openid);
         }
         if (result.url().contains("userinfo")) {
-            Map<String, String> userData = JsonParser.parseJSONObject(result.body());
+            Map<String, String> userData = HttpJson.parseJSONObject(result.body());
             String openid = userData.get("openid");
             String nickname = userData.get("nickname");
             String headimgurl = userData.get("headimgurl");
@@ -143,13 +155,15 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
             user.setNickname(nickname);
             user.setHeadUrl(headimgurl);
             user.setUnionid(unionid);
-            user.setSex(sex.equals("1")?"男":"女");
+            user.setSex(sex.equals("1") ? "男" : "女");
             user.setProvince(province);
             user.setCity(city);
             user.setPrivilege(privilege);
 
             Intent intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-            intent.putExtra("WxUser",user);
+            intent.putExtra("WxUser", user);
+            intent.putExtra("code", 1);
+            intent.putExtra("msg", "登录微信成功");
             sendBroadcast(intent);
         }
     }

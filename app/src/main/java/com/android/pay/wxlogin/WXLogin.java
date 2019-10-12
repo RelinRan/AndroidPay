@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
@@ -34,7 +35,9 @@ public class WXLogin {
     public final OnWXLoginListener listener;
     private LoginReceiver loginReceiver;
     public static final String WX_LOGIN_ACTION = "ACTION_COM_ANDROID_PAY_WX_LOGIN";
-
+    public static final int CODE_AUTH_DENIED = BaseResp.ErrCode.ERR_AUTH_DENIED;
+    public static final int CODE_USER_CANCEL = BaseResp.ErrCode.ERR_USER_CANCEL;
+    public static final int CODE_USER_LOADING = BaseResp.ErrCode.ERR_OK;
 
     /**
      * 微信登录构造函数
@@ -76,7 +79,7 @@ public class WXLogin {
 
         private OnWXLoginListener listener;
 
-        public Builder(Context context){
+        public Builder(Context context) {
             this.context = context;
 
         }
@@ -180,10 +183,24 @@ public class WXLogin {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(WX_LOGIN_ACTION)){
-                WXUser user = (WXUser) intent.getSerializableExtra("WxUser");
-                if (listener != null) {
-                    listener.onWXLogin(user);
+            if (action.equals(WX_LOGIN_ACTION)) {
+                if (intent.getSerializableExtra("WxUser") != null) {
+                    WXUser user = (WXUser) intent.getSerializableExtra("WxUser");
+                    if (listener != null) {
+                        listener.onWXLoginSucceed(user);
+                    }
+                } else {
+                    int code = intent.getIntExtra("code", -200);
+                    String msg = intent.getStringExtra("msg");
+                    if (code == WXLogin.CODE_USER_LOADING) {
+                        if (listener != null) {
+                            listener.onWXLoginLoading();
+                        }
+                    }else{
+                        if (listener != null) {
+                            listener.onWXLoginFailed(code,msg);
+                        }
+                    }
                 }
                 if (context != null && loginReceiver != null) {
                     context.unregisterReceiver(loginReceiver);
