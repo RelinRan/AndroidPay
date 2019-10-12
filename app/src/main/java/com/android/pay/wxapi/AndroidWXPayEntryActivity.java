@@ -15,7 +15,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 
-public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
+public class AndroidWXPayEntryActivity extends Activity implements IWXAPIEventHandler {
 
     private IWXAPI api;
 
@@ -58,4 +58,5 @@ public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
     public void onReq(BaseReq baseReq) {
 
     }
+
 }

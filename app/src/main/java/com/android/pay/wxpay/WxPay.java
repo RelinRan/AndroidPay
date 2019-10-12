@@ -3,8 +3,7 @@ package com.android.pay.wxpay;
 import android.content.Context;
 import android.util.Log;
 
-import com.android.pay.R;
-import com.android.pay.net.HttpResult;
+import com.android.pay.net.HttpResponse;
 import com.android.pay.net.HttpUtils;
 import com.android.pay.net.OnHttpListener;
 import com.android.pay.net.RequestParams;
@@ -297,12 +296,12 @@ public class WxPay implements OnHttpListener {
         RequestParams requestParameter = new RequestParams();
         requestParameter.addStringBody(prePayXml);
         String url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-        new HttpUtils().post(url, requestParameter, this);
+        HttpUtils.post(context,url, requestParameter, this);
     }
 
     @Override
-    public void onHttpSucceed(HttpResult result) {
-        Map<String, String> map = WxUtils.decodeXml(result.getBody());
+    public void onHttpSucceed(HttpResponse result) {
+        Map<String, String> map = WxUtils.decodeXml(result.body());
         Log.i(this.getClass().getSimpleName(), "onHttpSuccess result：" + result);
         PayReq payReq = new PayReq();
         payReq.appId = appId;
@@ -327,7 +326,7 @@ public class WxPay implements OnHttpListener {
     }
 
     @Override
-    public void onHttpFailure(HttpResult result) {
+    public void onHttpFailure(HttpResponse result) {
 
     }
 

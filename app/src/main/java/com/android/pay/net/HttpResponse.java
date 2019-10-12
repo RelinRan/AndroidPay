@@ -6,12 +6,14 @@ import java.io.Serializable;
  * Created by Ice on 2017/8/6.
  */
 
-public class HttpResult implements Serializable {
+public class HttpResponse implements Serializable {
 
     //返回的数据
     private String body;
     //请求地址
     private String url;
+    //请求的结果code
+    private int code;
     //请求参数
     private RequestParams requestParams;
     //文件流异常
@@ -19,44 +21,51 @@ public class HttpResult implements Serializable {
     //回调接口
     private OnHttpListener httpListener;
 
-    public String getBody() {
+    public String body() {
         return body;
     }
 
-    public void setBody(String body) {
+    public void body(String body) {
         this.body = body;
     }
 
-    public String getUrl() {
+    public String url() {
         return url;
     }
 
-    public void setUrl(String url) {
+    public void url(String url) {
         this.url = url;
     }
 
-    public Exception getException() {
+    public Exception exception() {
         return exception;
     }
 
-    public void setException(Exception exception) {
+    public void exception(Exception exception) {
         this.exception = exception;
     }
 
-    public OnHttpListener getHttpListener() {
+    public OnHttpListener listener() {
         return httpListener;
     }
 
-    public void setHttpListener(OnHttpListener httpListener) {
+    public void listener(OnHttpListener httpListener) {
         this.httpListener = httpListener;
     }
 
-    public RequestParams getRequestParams() {
+    public RequestParams requestParams() {
         return requestParams;
     }
 
-    public void setRequestParams(RequestParams requestParams) {
+    public void requestParams(RequestParams requestParams) {
         this.requestParams = requestParams;
     }
 
+    public int code() {
+        return code;
+    }
+
+    public void code(int code) {
+        this.code = code;
+    }
 }

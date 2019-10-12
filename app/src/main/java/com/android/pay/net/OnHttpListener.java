@@ -11,15 +11,15 @@ public interface OnHttpListener {
     /**
      * get data from http failure method callback
      *
-     * @param result   response succeed information
+     * @param result response succeed information
      */
-    void onHttpFailure(HttpResult result);
+    void onHttpFailure(HttpResponse result);
 
     /**
      * get data from http succeed method callback
      *
-     * @param result   response succeed information
+     * @param result response succeed information
      */
-    void onHttpSucceed(HttpResult result);
+    void onHttpSucceed(HttpResponse result);
 
 }
