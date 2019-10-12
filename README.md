@@ -148,13 +148,13 @@ B.支付调用
 ```
 
 ####  4.微信登录
-需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承AndroidWXEntryActivity
+A.需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承AndroidWXEntryActivity
 ```
 public class WXEntryActivity extends AndroidWXEntryActivity {
 
 }
 ```
-微信登录代码
+B.微信登录代码
 ```
     WXLogin.Builder builder = new WXLogin.Builder(context);
     builder.appId(xxx);
