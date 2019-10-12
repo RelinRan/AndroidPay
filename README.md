@@ -196,3 +196,19 @@ B.支付调用
     UUPay uuPay = new UUPay(this);
     uuPay.pay(tn,UUPay.PayMode.FORM);
 ```
+
+####  4.微信登录
+需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承AndroidWXEntryActivity
+
+```
+    WXLogin.Builder builder = new WXLogin.Builder(context);
+    builder.appId(xxx);
+    builder.appSecret(xxx);
+    builder.listener(new OnWXLoginListener() {
+        @Override
+        public void onWXLogin(WXUser user) {
+
+        }
+    });
+    builder.build();
+```
