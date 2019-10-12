@@ -26,57 +26,11 @@ dependencies {
 	}
 ```
 #### 1. 微信支付
-A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件
+A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承AndroidWXEntryActivity
 
 ```
-public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
+public class WXPayEntryActivity extends AndroidWXPayEntryActivity {
 
-    private IWXAPI api;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.android_aty_wx_pay);
-        api = WXAPIFactory.createWXAPI(this, WxPay.APP_ID);
-        api.handleIntent(getIntent(), this);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        api.handleIntent(intent, this);
-    }
-
-    @Override
-    public void onResp(BaseResp baseResp) {
-        //错误参数 https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_12&index=2
-        //errorCode:[0:success,-1:fail,-2:cancel]
-        if (baseResp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX) {
-            if (baseResp.errCode == 0) {
-                Log.i(this.getClass().getSimpleName(), "[微信支付成功]==>展示成功页面。");
-                finish();
-            }
-            if (baseResp.errCode == -1) {
-                Log.i(this.getClass().getSimpleName(), "[微信支付调用失败]==>可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。");
-                finish();
-            }
-            if (baseResp.errCode == -2) {
-                Log.i(this.getClass().getSimpleName(), "[微信支付用户取消]==>无需处理。发生场景：用户不支付了，点击取消，返回APP。");
-                finish();
-            }
-            Intent intent = new Intent(WxPay.ACTION_PAY_FINISH);
-            intent.putExtra(WxPay.PAY_RESULT, baseResp.errCode);
-            sendBroadcast(intent);
-        } else {
-            finish();
-        }
-    }
-
-    @Override
-    public void onReq(BaseReq baseReq) {
-
-    }
 }
 ```
 B.AndroidManifest.xml配置
@@ -101,27 +55,23 @@ C.支付调用
         builder.timeStamp(xxxx);
         builder.packageValue("Sign=WXPay");
         builder.sign(xxxx);
-        builder.extData(xxxxx);//支付提示文字
-        builder.build().pay();
+        builder.listener(new OnWXPayListener() {
 
+            @Override
+            public void onWXPay(int code,String msg) {
+                if(code==WxPay.PAY_CODE_SUCCEED){//支付成功
 
-        //如果需要支付支付结果，需要广播接收。但是不建议这么做，最好还是后台写一个接口
-	//来判断是否支付成功，因为有时候支付广播判断有问题。
-    private class WxReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(WxPay.ACTION_PAY_FINISH)) {
-                int code = intent.getIntExtra(WxPay.PAY_RESULT, -1);
-                Log.i("RRL", this.getClass().getSimpleName() + "---->[onReceive]--->code:" + code);
-                if (code == 0) {
-                    showToast(ToastMode.SUCCEED, "支付成功");
-                } else {
-                    showToast(ToastMode.FAILURE, "支付失败");
+                }
+                if(code==WxPay.PAY_CODE_CANCEL){//用户取消
+
+                }
+                if(code==WxPay.PAY_CODE_FAILED){//支付失败
+
                 }
             }
-        }
-    }
+        });
+        builder.extData(xxxxx);//支付提示文字
+        builder.build();
 
 ```
 
@@ -187,7 +137,7 @@ B.支付调用
         }
      });
     builder.loading(true);
-    builder.build().pay();
+    builder.build();
 ```
 
 ####  3.银联支付
@@ -198,8 +148,12 @@ B.支付调用
 ```
 
 ####  4.微信登录
-需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承AndroidWXEntryActivity
+需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承AndroidWXEntryActivity
+```
+public class WXEntryActivity extends AndroidWXEntryActivity {
 
+}
+```
 ```
     WXLogin.Builder builder = new WXLogin.Builder(context);
     builder.appId(xxx);
