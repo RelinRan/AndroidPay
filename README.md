@@ -94,11 +94,7 @@ B.支付调用
 ```
      AliPay.Builder builder = new AliPay.Builder(this);
      builder.orderInfo(data);
-     builder.listener(new AliPayListener() {
-         @Override
-         public void aliPaySuccess(String s, String s1, String s2) {
-                showToast(ToastMode.SUCCEED, "支付成功");
-         }
+     builder.listener(new OnAliPayListener() {
 	    
     /**
      * 参数解释
@@ -124,8 +120,6 @@ B.支付调用
      *                    code	String	是	16	结果码	具体见
      * @param description description是描述信息(类型为字符串)
      */
-	  
-	  
      @Override
      public void onAliPay(String status, String json, String description) {
             if(status.equals("9000")){//成功
