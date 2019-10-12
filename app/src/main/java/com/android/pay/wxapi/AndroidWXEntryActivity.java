@@ -12,6 +12,7 @@ import com.android.pay.net.OnHttpListener;
 import com.android.pay.net.RequestParams;
 import com.android.pay.wxlogin.WXLogin;
 import com.android.pay.wxlogin.WXUser;
+import com.android.pay.wxpay.WxPay;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
@@ -23,15 +24,14 @@ import java.util.Map;
 
 public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandler, OnHttpListener {
 
-    private String TAG = "AndroidWXEntryActivity";
     private IWXAPI wxAPI;
+    private String TAG = "WXEntryActivity";
     private static final int RETURN_MSG_TYPE_LOGIN = 1; //登录
     private static final int RETURN_MSG_TYPE_SHARE = 2; //分享
 
+    private WXUser user;
     private String openid;
     private String access_token;
-
-    private WXUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +46,11 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         wxAPI.handleIntent(getIntent(), this);
-        Log.i("WXEntryActivity", "WXEntryActivity onNewIntent");
     }
 
     @Override
     public void onReq(BaseReq arg0) {
-        Log.i("WXEntryActivity", "[onReq] arg0:" + arg0);
+        Log.i(TAG, "[onReq] -> arg0:" + arg0);
     }
 
     @Override
@@ -62,8 +61,8 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
         switch (resp.errCode) {
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
                 intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-                intent.putExtra("code", BaseResp.ErrCode.ERR_AUTH_DENIED);
-                intent.putExtra("msg", "已拒绝授权微信登录");
+                intent.putExtra(WXLogin.KEY_CODE, WXLogin.CODE_AUTH_DENIED);
+                intent.putExtra(WXLogin.KEY_MSG, "已拒绝授权微信登录");
                 sendBroadcast(intent);
                 Log.i(TAG, "[onResp] -> 拒绝授权微信登录");
                 break;
@@ -75,8 +74,8 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
                     message = "取消了微信分享";
                 }
                 intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-                intent.putExtra("code", BaseResp.ErrCode.ERR_USER_CANCEL);
-                intent.putExtra("msg", "已拒绝授权微信登录");
+                intent.putExtra(WXLogin.KEY_CODE, WXLogin.CODE_USER_CANCEL);
+                intent.putExtra(WXLogin.KEY_MSG, "已拒绝授权微信登录");
                 sendBroadcast(intent);
                 Log.i(TAG, "[onResp] -> " + message);
                 break;
@@ -87,8 +86,8 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
                     Log.i(TAG, "[onResp] -> 用户开始登录微信...");
                     //这里拿到了这个code，去做2次网络请求获取access_token和用户个人信息
                     intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-                    intent.putExtra("code", BaseResp.ErrCode.ERR_OK);
-                    intent.putExtra("msg", "用户开始登录微信");
+                    intent.putExtra(WXLogin.KEY_CODE, WXLogin.CODE_USER_LOADING);
+                    intent.putExtra(WXLogin.KEY_MSG, "用户开始登录微信");
                     sendBroadcast(intent);
                     getAccessToken(code);
                 } else if (type == RETURN_MSG_TYPE_SHARE) {
@@ -117,7 +116,7 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
 
     @Override
     public void onHttpFailure(HttpResponse result) {
-
+        Log.i(TAG, "[onHttpFailure] -> msg:" + result.exception().toString());
     }
 
     @Override
@@ -161,9 +160,9 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
             user.setPrivilege(privilege);
 
             Intent intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-            intent.putExtra("WxUser", user);
-            intent.putExtra("code", 1);
-            intent.putExtra("msg", "登录微信成功");
+            intent.putExtra(WXLogin.KEY_USER, user);
+            intent.putExtra(WXLogin.KEY_CODE, WXLogin.CODE_LOGIN_SUCCEED);
+            intent.putExtra(WXLogin.KEY_MSG, "登录微信成功");
             sendBroadcast(intent);
         }
     }

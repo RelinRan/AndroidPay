@@ -18,6 +18,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 public class AndroidWXPayEntryActivity extends Activity implements IWXAPIEventHandler {
 
     private IWXAPI api;
+    private final String TAG = "WXPayEntryActivity";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,15 +42,15 @@ public class AndroidWXPayEntryActivity extends Activity implements IWXAPIEventHa
         String msg = "";
         if (baseResp.errCode == 0) {
             msg = "支付成功";
-            Log.i(this.getClass().getSimpleName(), "[微信支付成功]==>展示成功页面。");
+            Log.i(TAG, "[onResp] -> 微信支付成功,展示成功页面。");
         }
         if (baseResp.errCode == -1) {
             msg = "支付失败";
-            Log.i(this.getClass().getSimpleName(), "[微信支付调用失败]==>可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。");
+            Log.i(TAG, "[onResp] -> 微信支付调用失败,可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。");
         }
         if (baseResp.errCode == -2) {
             msg = "取消支付";
-            Log.i(this.getClass().getSimpleName(), "[微信支付用户取消]==>无需处理。发生场景：用户不支付了，点击取消，返回APP。");
+            Log.i(TAG, "[onResp] -> 微信支付用户取消,无需处理。发生场景：用户不支付了，点击取消，返回APP。");
         }
         if (baseResp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX) {
             Intent intent = new Intent(WxPay.ACTION_PAY_FINISH);

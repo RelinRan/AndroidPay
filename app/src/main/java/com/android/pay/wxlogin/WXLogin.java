@@ -13,6 +13,37 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 public class WXLogin {
 
     /**
+     * 微信登录Action
+     */
+    public static final String WX_LOGIN_ACTION = "ACTION_COM_ANDROID_PAY_WX_LOGIN";
+
+    /**
+     * 微信授权失败
+     */
+    public static final int CODE_AUTH_DENIED = BaseResp.ErrCode.ERR_AUTH_DENIED;
+
+    /**
+     * 微信用户取消登录
+     */
+    public static final int CODE_USER_CANCEL = BaseResp.ErrCode.ERR_USER_CANCEL;
+
+    /**
+     * 微信用户正在登录
+     */
+    public static final int CODE_USER_LOADING = BaseResp.ErrCode.ERR_OK;
+
+    /**
+     * 微信用户登录成功
+     */
+    public static final int CODE_LOGIN_SUCCEED = 1;
+
+    public static final String KEY_CODE = "code";
+
+    public static final String KEY_MSG = "msg";
+
+    public static final String KEY_USER = "user";
+
+    /**
      * 微信appId
      */
     public final String appId;
@@ -30,14 +61,15 @@ public class WXLogin {
     public static String APP_SECRET;
 
     /**
+     * 登录接收器
+     */
+    private LoginReceiver loginReceiver;
+
+    /**
      * 登录监听
      */
     public final OnWXLoginListener listener;
-    private LoginReceiver loginReceiver;
-    public static final String WX_LOGIN_ACTION = "ACTION_COM_ANDROID_PAY_WX_LOGIN";
-    public static final int CODE_AUTH_DENIED = BaseResp.ErrCode.ERR_AUTH_DENIED;
-    public static final int CODE_USER_CANCEL = BaseResp.ErrCode.ERR_USER_CANCEL;
-    public static final int CODE_USER_LOADING = BaseResp.ErrCode.ERR_OK;
+
 
     /**
      * 微信登录构造函数
@@ -178,29 +210,23 @@ public class WXLogin {
         wxAPI.sendReq(req);
     }
 
+    /**
+     * 登录接收器
+     */
     private class LoginReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(WX_LOGIN_ACTION)) {
-                if (intent.getSerializableExtra("WxUser") != null) {
-                    WXUser user = (WXUser) intent.getSerializableExtra("WxUser");
-                    if (listener != null) {
-                        listener.onWXLoginSucceed(user);
-                    }
-                } else {
-                    int code = intent.getIntExtra("code", -200);
-                    String msg = intent.getStringExtra("msg");
-                    if (code == WXLogin.CODE_USER_LOADING) {
-                        if (listener != null) {
-                            listener.onWXLoginLoading();
-                        }
-                    }else{
-                        if (listener != null) {
-                            listener.onWXLoginFailed(code,msg);
-                        }
-                    }
+                int code = intent.getIntExtra(WXLogin.KEY_CODE, -200);
+                String msg = intent.getStringExtra(WXLogin.KEY_MSG);
+                WXUser user = null;
+                if (intent.getSerializableExtra(WXLogin.KEY_USER) != null) {
+                    user = (WXUser) intent.getSerializableExtra(WXLogin.KEY_USER);
+                }
+                if (listener != null) {
+                    listener.onWXLogin(code, msg, user);
                 }
                 if (context != null && loginReceiver != null) {
                     context.unregisterReceiver(loginReceiver);
