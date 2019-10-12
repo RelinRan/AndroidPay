@@ -154,6 +154,7 @@ public class WXEntryActivity extends AndroidWXEntryActivity {
 
 }
 ```
+微信登录代码
 ```
     WXLogin.Builder builder = new WXLogin.Builder(context);
     builder.appId(xxx);
