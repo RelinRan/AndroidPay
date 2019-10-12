@@ -179,12 +179,15 @@ public class WXLogin {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            WXUser user = (WXUser) intent.getSerializableExtra("WxUser");
-            if (listener != null) {
-                listener.onWXLogin(user);
-            }
-            if (context != null && loginReceiver != null) {
-                context.unregisterReceiver(loginReceiver);
+            String action = intent.getAction();
+            if (action.equals(WX_LOGIN_ACTION)){
+                WXUser user = (WXUser) intent.getSerializableExtra("WxUser");
+                if (listener != null) {
+                    listener.onWXLogin(user);
+                }
+                if (context != null && loginReceiver != null) {
+                    context.unregisterReceiver(loginReceiver);
+                }
             }
         }
     }
