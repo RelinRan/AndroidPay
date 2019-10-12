@@ -129,6 +129,7 @@ public class AliPay {
         this.goodDetail = builder.goodDetail;
         this.goodPrice = builder.goodPrice;
         this.notifyUrl = builder.notifyUrl;
+        pay();
     }
 
 

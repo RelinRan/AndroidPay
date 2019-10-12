@@ -1,12 +1,16 @@
 package com.android.pay.wxpay;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 
 import com.android.pay.net.HttpResponse;
 import com.android.pay.net.HttpUtils;
 import com.android.pay.net.OnHttpListener;
 import com.android.pay.net.RequestParams;
+import com.android.pay.wxlogin.OnWXLoginListener;
 import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
@@ -14,6 +18,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.zip.Inflater;
 
 
 /**
@@ -30,6 +35,10 @@ public class WxPay implements OnHttpListener {
     public static final String ACTION_PAY_FINISH = "ACTION_PAY_FINISH";
     //0:success,-1:fail,-2:cancel [type:int]
     public static final String PAY_RESULT = "PAY_RESULT";
+    public static final String PAY_MSG = "PAY_MSG";
+    public static final int PAY_CODE_SUCCEED = 0;
+    public static final int PAY_CODE_FAILED = -1;
+    public static final int PAY_CODE_CANCEL = -2;
 
     public static String APP_ID;
 
@@ -55,6 +64,10 @@ public class WxPay implements OnHttpListener {
     public final String sign;
     public final String extData;
 
+    public final OnWXPayListener listener;
+
+    private WXPayReceiver receiver;
+
     public static class Builder {
 
         private Context context;
@@ -75,6 +88,8 @@ public class WxPay implements OnHttpListener {
         private String packageValue = "Sign=WXPay";
         private String sign;
         private String extData;
+
+        private OnWXPayListener listener;
 
         public Builder(Context context) {
             this.context = context;
@@ -206,6 +221,15 @@ public class WxPay implements OnHttpListener {
             return this;
         }
 
+        public OnWXPayListener listener() {
+            return listener;
+        }
+
+        public Builder listener(OnWXPayListener listener) {
+            this.listener = listener;
+            return this;
+        }
+
         public WxPay build() {
             return new WxPay(this);
         }
@@ -231,8 +255,16 @@ public class WxPay implements OnHttpListener {
         this.sign = builder.sign;
         this.extData = builder.extData;
 
+        this.listener = builder.listener;
+        if (listener != null && receiver != null) {
+            IntentFilter filter = new IntentFilter(WxPay.ACTION_PAY_FINISH);
+            receiver = new WXPayReceiver();
+            context.registerReceiver(receiver, filter);
+        }
+
         APP_ID = appId;
         iwxapi = WXAPIFactory.createWXAPI(context, appId);
+        pay();
     }
 
     public void pay() {
@@ -296,7 +328,7 @@ public class WxPay implements OnHttpListener {
         RequestParams requestParameter = new RequestParams();
         requestParameter.addStringBody(prePayXml);
         String url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-        HttpUtils.post(context,url, requestParameter, this);
+        HttpUtils.post(context, url, requestParameter, this);
     }
 
     @Override
@@ -328,6 +360,24 @@ public class WxPay implements OnHttpListener {
     @Override
     public void onHttpFailure(HttpResponse result) {
 
+    }
+
+    private class WXPayReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(WxPay.ACTION_PAY_FINISH)) {
+                int code = intent.getIntExtra(WxPay.PAY_RESULT, -1);
+                String msg = intent.getStringExtra(WxPay.PAY_MSG);
+                if (listener != null) {
+                    listener.onWXPay(code, msg);
+                }
+                if (context != null && receiver != null) {
+                    context.unregisterReceiver(receiver);
+                }
+            }
+        }
     }
 
 
