@@ -74,7 +74,7 @@ public class AliPay {
     /**
      * 支付回调函数
      */
-    public final AliPayListener listener;
+    public final OnAliPayListener listener;
 
     /**
      * 用户在商户app内部点击付款，是否需要一个loading做为在钱包唤起之前的过渡，这个值设置为true，
@@ -142,7 +142,7 @@ public class AliPay {
         private String orderInfo;
         private String h5Url;
         private Activity activity;
-        private AliPayListener listener;
+        private OnAliPayListener listener;
         private boolean loading = true;
 
         private String orderNo;
@@ -213,11 +213,11 @@ public class AliPay {
             return activity;
         }
 
-        public AliPayListener listener() {
+        public OnAliPayListener listener() {
             return listener;
         }
 
-        public Builder listener(AliPayListener listener) {
+        public Builder listener(OnAliPayListener listener) {
             this.listener = listener;
             return this;
         }
@@ -482,49 +482,16 @@ public class AliPay {
                          * detail.htm?spm=0.0.0.0.xdvAU6&treeId=59&articleId=103665&
                          * docType=test) 建议商户依赖异步通知
                          */
-                        String resultInfo = payResult.getResult();// 同步返回需要验证的信息
-                        String resultStatus = payResult.getResultStatus();
-                        // 判断resultStatus 为“9000”则代表支付成功，具体状态码代表含义可参考接口文档
-                        if (TextUtils.equals(resultStatus, "9000")) {
-                            if (listener != null) {
-                                listener.aliPaySuccess(payResult.getResultStatus(), payResult.getResult(), payResult.getMemo());
-                            }
-                        } else {
-                            // 判断resultStatus 为非"9000"则代表可能支付失败
-                            // "8000"代表支付结果因为支付渠道原因或者系统原因还在等待支付结果确认，最终交易是否成功以服务端异步通知为准（小概率状态）
-                            if (TextUtils.equals(resultStatus, "8000")) {
-                                if (listener != null) {
-                                    listener.aliPaying(payResult.getResultStatus(), payResult.getResult(), payResult.getMemo());
-                                }
-                            } else {
-                                // 其他值就可以判断为支付失败，包括用户主动取消支付，或者系统返回的错误
-                                if (listener != null) {
-                                    listener.aliPayFail(payResult.getResultStatus(), payResult.getResult(), payResult.getMemo());
-                                }
-                            }
+                        if (listener != null) {
+                            listener.onAliPay(payResult.getResultStatus(), payResult.getResult(), payResult.getMemo());
                         }
                     } else if (version == 2) {//新版本支付
                         PayResult payResult = new PayResult((Map<String, String>) msg.obj);
                         /**
                          对于支付结果，请商户依赖服务端的异步通知结果。同步通知结果，仅作为支付结束的通知。
                          */
-                        String resultStatus = payResult.getResultStatus();
-                        // 判断resultStatus 为9000则代表支付成功
-                        if (TextUtils.equals(resultStatus, "9000")) {
-                            // 该笔订单是否真实支付成功，需要依赖服务端的异步通知。
-                            if (listener != null) {
-                                listener.aliPaySuccess(payResult.getResultStatus(), payResult.getResult(), payResult.getMemo());
-                            }
-                        } else if (TextUtils.equals(resultStatus, "8000")) {
-                            // 正在处理中，支付结果未知（有可能已经支付成功），请查询商户订单列表中订单的支付状态
-                            if (listener != null) {
-                                listener.aliPaying(payResult.getResultStatus(), payResult.getResult(), payResult.getMemo());
-                            }
-                        } else {
-                            // 其他值就可以判断为支付失败，包括用户主动取消支付，或者系统返回的错误
-                            if (listener != null) {
-                                listener.aliPayFail(payResult.getResultStatus(), payResult.getResult(), payResult.getMemo());
-                            }
+                        if (listener != null) {
+                            listener.onAliPay(payResult.getResultStatus(), payResult.getResult(), payResult.getMemo());
                         }
                     }
                     break;
