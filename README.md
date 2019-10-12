@@ -156,24 +156,25 @@ public class WXEntryActivity extends AndroidWXEntryActivity {
 ```
 B.微信登录代码
 ```
-    WXLogin.Builder builder = new WXLogin.Builder(context);
-    builder.appId(xxx);
-    builder.appSecret(xxx);
-    builder.listener(new OnWXLoginListener() {
-        @Override
-        public void onWXLoginLoading() {//正在登录，可以显示自己的loading
+WXLogin.Builder builder = new WXLogin.Builder(context);
+builder.appId("xxx");
+builder.appSecret("xxx");
+builder.listener(new OnWXLoginListener() {
+    @Override
+    public void onWXLogin(int code, String msg, WXUser user) {
+        if (code==WXLogin.CODE_USER_LOADING){//登录中
 
-        }
+         }
+        if (code==WXLogin.CODE_LOGIN_SUCCEED){//登录成功
 
-        @Override
-        public void onWXLoginSucceed(WXUser user) {//登录成功
+         }
+         if (code==WXLogin.CODE_USER_CANCEL){//用户取消登录
 
-        }
+         }
+         if (code==WXLogin.CODE_AUTH_DENIED){//授权取消
 
-        @Override
-        public void onWXLoginFailed(int code, String msg) {//登录失败
-
-        }
-    });
-    builder.build();
+         }
+    }
+});
+builder.build();
 ```
