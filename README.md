@@ -127,13 +127,16 @@ B.支付调用
 	  
 	  
      @Override
-     public void aliPayFail(String status, String json, String description) {
-           showToast(ToastMode.FAILURE, "支付失败");
-        }
+     public void onAliPay(String status, String json, String description) {
+            if(status.equals("9000")){//成功
 
-        @Override
-        public void aliPaying(String status, String json, String description) {
+            }
+            else if(status.equals("6001")){//用户取消
 
+            }
+            else{//支付失败
+
+            }
         }
      });
     builder.loading(true);
