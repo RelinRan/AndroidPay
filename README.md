@@ -161,7 +161,17 @@ B.微信登录代码
     builder.appSecret(xxx);
     builder.listener(new OnWXLoginListener() {
         @Override
-        public void onWXLogin(WXUser user) {
+        public void onWXLoginLoading() {//正在登录，可以显示自己的loading
+
+        }
+
+        @Override
+        public void onWXLoginSucceed(WXUser user) {//登录成功
+
+        }
+
+        @Override
+        public void onWXLoginFailed(int code, String msg) {//登录失败
 
         }
     });
