@@ -36,11 +36,8 @@ public class WXLogin {
      * 微信用户登录成功
      */
     public static final int CODE_LOGIN_SUCCEED = 1;
-
     public static final String KEY_CODE = "code";
-
     public static final String KEY_MSG = "msg";
-
     public static final String KEY_USER = "user";
 
     /**
@@ -69,7 +66,6 @@ public class WXLogin {
      * 登录监听
      */
     public final OnWXLoginListener listener;
-
 
     /**
      * 微信登录构造函数
