@@ -91,7 +91,7 @@ public class WXLogin {
         login(appId);
     }
 
-    public class Builder {
+    public static class Builder {
 
 
         /**
