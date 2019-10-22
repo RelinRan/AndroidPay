@@ -89,7 +89,6 @@ public class WXLogin {
 
     public static class Builder {
 
-
         /**
          * 上下文对象
          */
