@@ -222,7 +222,7 @@ public class WXLogin {
                 if (listener != null) {
                     listener.onWXLogin(code, msg, user);
                 }
-                if (context != null && loginReceiver != null) {
+                if (context != null && loginReceiver != null && (code == CODE_LOGIN_SUCCEED || code == CODE_USER_CANCEL || code == CODE_AUTH_DENIED)) {
                     context.unregisterReceiver(loginReceiver);
                 }
             }
