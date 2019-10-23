@@ -169,7 +169,16 @@ public class WXEntryActivity extends AndroidWXEntryActivity {
 
 }
 ```
-B.微信登录代码
+B.AndroidManifest.xml配置
+
+```
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
+```
+C.微信登录代码
 ```
 WXLogin.Builder builder = new WXLogin.Builder(context);
 builder.appId("xxx");
