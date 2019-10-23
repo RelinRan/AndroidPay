@@ -7,6 +7,7 @@ Android支付,主要用户中国常用的微信支付、支付宝支付、银联
 只要采用Builder模式
 
 #### 使用说明
+A.方法一
 
 （1）在项目下的build.gradle配置如下
 
@@ -22,8 +23,26 @@ Android支付,主要用户中国常用的微信支付、支付宝支付、银联
 （2）在项目app文件夹下的build.gradle配置如下
 ```
 dependencies {
-	        implementation 'com.github.RelinRan:AndroidPay:1.0.2'
+	        implementation 'com.github.RelinRan:AndroidPay:1.0.3'
 	}
+```
+B.方法二
+## ARR依赖
+[AndroidKit.arr](https://github.com/RelinRan/AndroidPay/blob/master/AndroidPay.aar)
+```
+android {
+    ....
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
+
+dependencies {
+    implementation(name: 'AndroidPay', ext: 'aar')
+}
+
 ```
 #### 1. 微信支付
 A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承AndroidWXEntryActivity
