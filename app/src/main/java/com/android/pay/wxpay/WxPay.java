@@ -292,7 +292,6 @@ public class WxPay implements OnHttpListener {
         }
     }
 
-
     /**
      * 下单获取PrepayId
      */
