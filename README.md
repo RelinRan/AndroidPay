@@ -7,7 +7,7 @@ Android支付,主要用户中国常用的微信支付、支付宝支付、银联
 只要采用Builder模式
 
 #### 使用说明
-A.方法一
+## 方法一  JitPack依赖
 
 （1）在项目下的build.gradle配置如下
 
@@ -26,8 +26,7 @@ dependencies {
 	        implementation 'com.github.RelinRan:AndroidPay:1.0.3'
 	}
 ```
-B.方法二
-## ARR依赖
+## 方法二  ARR依赖
 [AndroidPay.arr](https://github.com/RelinRan/AndroidPay/blob/master/AndroidPay.aar)
 ```
 android {
