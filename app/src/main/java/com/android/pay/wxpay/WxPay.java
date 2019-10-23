@@ -256,12 +256,11 @@ public class WxPay implements OnHttpListener {
         this.extData = builder.extData;
 
         this.listener = builder.listener;
-        if (listener != null && receiver != null) {
+        if (listener != null && receiver == null) {
             IntentFilter filter = new IntentFilter(WxPay.ACTION_PAY_FINISH);
             receiver = new WXPayReceiver();
             context.registerReceiver(receiver, filter);
         }
-
         APP_ID = appId;
         iwxapi = WXAPIFactory.createWXAPI(context, appId);
         pay();
