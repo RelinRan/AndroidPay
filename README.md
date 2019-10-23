@@ -23,7 +23,7 @@ Android支付,主要用户中国常用的微信支付、支付宝支付、银联
 （2）在项目app文件夹下的build.gradle配置如下
 ```
 dependencies {
-	        implementation 'com.github.RelinRan:AndroidPay:1.0.3'
+	        implementation 'com.github.RelinRan:AndroidPay:1.0.4'
 	}
 ```
 ## 方法二  ARR依赖
