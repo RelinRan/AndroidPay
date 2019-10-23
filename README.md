@@ -28,7 +28,7 @@ dependencies {
 ```
 B.方法二
 ## ARR依赖
-[AndroidKit.arr](https://github.com/RelinRan/AndroidPay/blob/master/AndroidPay.aar)
+[AndroidPay.arr](https://github.com/RelinRan/AndroidPay/blob/master/AndroidPay.aar)
 ```
 android {
     ....
