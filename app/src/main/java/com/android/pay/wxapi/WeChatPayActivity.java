@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.android.pay.R;
-import com.android.pay.wxpay.WxPay;
+import com.android.pay.wechat.WeChatPay;
 import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
@@ -15,7 +15,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 
-public class AndroidWXPayEntryActivity extends Activity implements IWXAPIEventHandler {
+public class WeChatPayActivity extends Activity implements IWXAPIEventHandler {
 
     private IWXAPI api;
     private final String TAG = "WXPayEntryActivity";
@@ -24,7 +24,7 @@ public class AndroidWXPayEntryActivity extends Activity implements IWXAPIEventHa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.android_aty_wx_pay);
-        api = WXAPIFactory.createWXAPI(this, WxPay.APP_ID);
+        api = WXAPIFactory.createWXAPI(this, WeChatPay.APP_ID);
         api.handleIntent(getIntent(), this);
     }
 
@@ -53,9 +53,9 @@ public class AndroidWXPayEntryActivity extends Activity implements IWXAPIEventHa
             Log.i(TAG, "[onResp] -> 微信支付用户取消,无需处理。发生场景：用户不支付了，点击取消，返回APP。");
         }
         if (baseResp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX) {
-            Intent intent = new Intent(WxPay.ACTION_PAY_FINISH);
-            intent.putExtra(WxPay.PAY_RESULT, baseResp.errCode);
-            intent.putExtra(WxPay.PAY_MSG, msg);
+            Intent intent = new Intent(WeChatPay.ACTION_PAY_FINISH);
+            intent.putExtra(WeChatPay.PAY_RESULT, baseResp.errCode);
+            intent.putExtra(WeChatPay.PAY_MSG, msg);
             sendBroadcast(intent);
         }
     }

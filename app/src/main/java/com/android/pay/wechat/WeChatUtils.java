@@ -1,4 +1,4 @@
-package com.android.pay.wxpay;
+package com.android.pay.wechat;
 
 import android.content.Context;
 import android.net.wifi.WifiInfo;
@@ -26,7 +26,7 @@ import java.util.TreeMap;
  * Created by Ice on 2016/2/19.
  * 微信支付工具
  */
-public class WxUtils {
+public class WeChatUtils {
 
     /**
      * 根包签名

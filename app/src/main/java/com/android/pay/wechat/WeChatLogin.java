@@ -1,4 +1,4 @@
-package com.android.pay.wxlogin;
+package com.android.pay.wechat;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,7 +10,7 @@ import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
-public class WXLogin {
+public class WeChatLogin {
 
     /**
      * 微信登录Action
@@ -65,20 +65,20 @@ public class WXLogin {
     /**
      * 登录监听
      */
-    public final OnWXLoginListener listener;
+    public final OnWeChatLoginListener listener;
 
     /**
      * 微信登录构造函数
      *
      * @param builder 构造器
      */
-    public WXLogin(Builder builder) {
+    public WeChatLogin(Builder builder) {
         this.context = builder.context;
         this.appId = builder.appId;
         this.appSecret = builder.appSecret;
         this.listener = builder.listener;
-        WXLogin.APP_ID = appId;
-        WXLogin.APP_SECRET = appSecret;
+        WeChatLogin.APP_ID = appId;
+        WeChatLogin.APP_SECRET = appSecret;
         if (listener != null && context != null && loginReceiver == null) {
             loginReceiver = new LoginReceiver();
             IntentFilter filter = new IntentFilter(WX_LOGIN_ACTION);
@@ -103,7 +103,7 @@ public class WXLogin {
          */
         private String appId;
 
-        private OnWXLoginListener listener;
+        private OnWeChatLoginListener listener;
 
         public Builder(Context context) {
             this.context = context;
@@ -164,7 +164,7 @@ public class WXLogin {
          *
          * @return
          */
-        public OnWXLoginListener listener() {
+        public OnWeChatLoginListener listener() {
             return listener;
         }
 
@@ -174,7 +174,7 @@ public class WXLogin {
          * @param listener
          * @return
          */
-        public Builder listener(OnWXLoginListener listener) {
+        public Builder listener(OnWeChatLoginListener listener) {
             this.listener = listener;
             return this;
         }
@@ -184,8 +184,8 @@ public class WXLogin {
          *
          * @return WxLogin
          */
-        public WXLogin build() {
-            return new WXLogin(this);
+        public WeChatLogin build() {
+            return new WeChatLogin(this);
         }
     }
 
@@ -195,7 +195,7 @@ public class WXLogin {
      * @param appId
      */
     private void login(String appId) {
-        WXLogin.APP_ID = appId;
+        WeChatLogin.APP_ID = appId;
         IWXAPI wxAPI = WXAPIFactory.createWXAPI(context, appId, true);
         wxAPI.registerApp(appId);
         SendAuth.Req req = new SendAuth.Req();
@@ -213,14 +213,14 @@ public class WXLogin {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(WX_LOGIN_ACTION)) {
-                int code = intent.getIntExtra(WXLogin.KEY_CODE, -200);
-                String msg = intent.getStringExtra(WXLogin.KEY_MSG);
-                WXUser user = null;
-                if (intent.getSerializableExtra(WXLogin.KEY_USER) != null) {
-                    user = (WXUser) intent.getSerializableExtra(WXLogin.KEY_USER);
+                int code = intent.getIntExtra(WeChatLogin.KEY_CODE, -200);
+                String msg = intent.getStringExtra(WeChatLogin.KEY_MSG);
+                WeChatUser user = null;
+                if (intent.getSerializableExtra(WeChatLogin.KEY_USER) != null) {
+                    user = (WeChatUser) intent.getSerializableExtra(WeChatLogin.KEY_USER);
                 }
                 if (listener != null) {
-                    listener.onWXLogin(code, msg, user);
+                    listener.onWeChatLogin(code, msg, user);
                 }
                 if (context != null && loginReceiver != null && (code == CODE_LOGIN_SUCCEED || code == CODE_USER_CANCEL || code == CODE_AUTH_DENIED)) {
                     context.unregisterReceiver(loginReceiver);

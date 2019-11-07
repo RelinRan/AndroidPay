@@ -1,8 +1,8 @@
-package com.android.pay.wxlogin;
+package com.android.pay.wechat;
 
 import java.io.Serializable;
 
-public class WXUser implements Serializable{
+public class WeChatUser implements Serializable{
 
     private String appId;
     private String appSecret;

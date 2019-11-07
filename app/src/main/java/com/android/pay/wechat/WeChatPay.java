@@ -1,4 +1,4 @@
-package com.android.pay.wxpay;
+package com.android.pay.wechat;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,7 +10,6 @@ import com.android.pay.net.HttpResponse;
 import com.android.pay.net.HttpUtils;
 import com.android.pay.net.OnHttpListener;
 import com.android.pay.net.RequestParams;
-import com.android.pay.wxlogin.OnWXLoginListener;
 import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
@@ -18,7 +17,6 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.zip.Inflater;
 
 
 /**
@@ -29,7 +27,7 @@ import java.util.zip.Inflater;
  * MCH_ID
  * API_KEY
  */
-public class WxPay implements OnHttpListener {
+public class WeChatPay implements OnHttpListener {
 
     //微信支付的广播
     public static final String ACTION_PAY_FINISH = "ACTION_PAY_FINISH";
@@ -64,7 +62,7 @@ public class WxPay implements OnHttpListener {
     public final String sign;
     public final String extData;
 
-    public final OnWXPayListener listener;
+    public final OnWeChatPayListener listener;
 
     private WXPayReceiver receiver;
 
@@ -89,7 +87,7 @@ public class WxPay implements OnHttpListener {
         private String sign;
         private String extData;
 
-        private OnWXPayListener listener;
+        private OnWeChatPayListener listener;
 
         public Builder(Context context) {
             this.context = context;
@@ -221,22 +219,22 @@ public class WxPay implements OnHttpListener {
             return this;
         }
 
-        public OnWXPayListener listener() {
+        public OnWeChatPayListener listener() {
             return listener;
         }
 
-        public Builder listener(OnWXPayListener listener) {
+        public Builder listener(OnWeChatPayListener listener) {
             this.listener = listener;
             return this;
         }
 
-        public WxPay build() {
-            return new WxPay(this);
+        public WeChatPay build() {
+            return new WeChatPay(this);
         }
 
     }
 
-    public WxPay(Builder builder) {
+    public WeChatPay(Builder builder) {
         this.context = builder.context;
 
         this.appId = builder.appId;
@@ -257,7 +255,7 @@ public class WxPay implements OnHttpListener {
 
         this.listener = builder.listener;
         if (listener != null && receiver == null) {
-            IntentFilter filter = new IntentFilter(WxPay.ACTION_PAY_FINISH);
+            IntentFilter filter = new IntentFilter(WeChatPay.ACTION_PAY_FINISH);
             receiver = new WXPayReceiver();
             context.registerReceiver(receiver, filter);
         }
@@ -304,22 +302,22 @@ public class WxPay implements OnHttpListener {
         //商户号
         params.put("mch_id", mchId);
         //随机字符串
-        params.put("nonce_str", WxUtils.getNonceStr());
+        params.put("nonce_str", WeChatUtils.getNonceStr());
         //异步通知Url
         params.put("notify_url", notify_url);
         //商户订单号
-        params.put("out_trade_no", out_trade_no == null ? WxUtils.getOutTradNo() : out_trade_no);
+        params.put("out_trade_no", out_trade_no == null ? WeChatUtils.getOutTradNo() : out_trade_no);
         //终端IP
-        params.put("spbill_create_ip", WxUtils.getLocalIpAddress(context));
+        params.put("spbill_create_ip", WeChatUtils.getLocalIpAddress(context));
         //总金额
-        params.put("total_fee", WxUtils.parseMoneyToFen(total_free));
+        params.put("total_fee", WeChatUtils.parseMoneyToFen(total_free));
         //交易类型 https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=4_2
         params.put("trade_type", "APP");
         //签名
-        String sign = WxUtils.getSign(context, apiKey, params);
+        String sign = WeChatUtils.getSign(context, apiKey, params);
         params.put("sign", sign);
         //参数转xml
-        String xmlString = WxUtils.paramsToXml(params);
+        String xmlString = WeChatUtils.paramsToXml(params);
         Log.i(this.getClass().getSimpleName(), "getPrepayId 参数：" + xmlString);
         //xutils工具类不需要字符转换
         String prePayXml = new String(xmlString.toString().getBytes(), "ISO8859-1");
@@ -331,15 +329,15 @@ public class WxPay implements OnHttpListener {
 
     @Override
     public void onHttpSucceed(HttpResponse result) {
-        Map<String, String> map = WxUtils.decodeXml(result.body());
+        Map<String, String> map = WeChatUtils.decodeXml(result.body());
         Log.i(this.getClass().getSimpleName(), "onHttpSuccess result：" + result);
         PayReq payReq = new PayReq();
         payReq.appId = appId;
         payReq.partnerId = mchId;
         payReq.prepayId = map.get("prepay_id");
         payReq.packageValue = "Sign=WXPay";
-        payReq.nonceStr = WxUtils.getNonceStr();
-        payReq.timeStamp = String.valueOf(WxUtils.getTimeStamp());
+        payReq.nonceStr = WeChatUtils.getNonceStr();
+        payReq.timeStamp = String.valueOf(WeChatUtils.getTimeStamp());
         //签名
         TreeMap<String, String> signParams = new TreeMap<>();
         signParams.put("appid", payReq.appId);
@@ -348,7 +346,7 @@ public class WxPay implements OnHttpListener {
         signParams.put("partnerid", payReq.partnerId);
         signParams.put("prepayid", payReq.prepayId);
         signParams.put("timestamp", payReq.timeStamp);
-        payReq.sign = WxUtils.getSign(context, apiKey, signParams);
+        payReq.sign = WeChatUtils.getSign(context, apiKey, signParams);
         //注册App
         iwxapi.registerApp(appId);
         //调用支付
@@ -365,11 +363,11 @@ public class WxPay implements OnHttpListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(WxPay.ACTION_PAY_FINISH)) {
-                int code = intent.getIntExtra(WxPay.PAY_RESULT, -1);
-                String msg = intent.getStringExtra(WxPay.PAY_MSG);
+            if (action.equals(WeChatPay.ACTION_PAY_FINISH)) {
+                int code = intent.getIntExtra(WeChatPay.PAY_RESULT, -1);
+                String msg = intent.getStringExtra(WeChatPay.PAY_MSG);
                 if (listener != null) {
-                    listener.onWXPay(code, msg);
+                    listener.onWeChatPay(code, msg);
                 }
                 if (context != null && receiver != null) {
                     context.unregisterReceiver(receiver);

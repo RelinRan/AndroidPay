@@ -1,9 +1,9 @@
-package com.android.pay.wxlogin;
+package com.android.pay.wechat;
 
 /**
  * 微信登录回调
  */
-public interface OnWXLoginListener {
+public interface OnWeChatLoginListener {
 
 
     /**
@@ -13,6 +13,6 @@ public interface OnWXLoginListener {
      * @param msg
      * @param user
      */
-    void onWXLogin(int code, String msg, WXUser user);
+    void onWeChatLogin(int code, String msg, WeChatUser user);
 
 }

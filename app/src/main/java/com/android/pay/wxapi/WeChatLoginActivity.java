@@ -10,9 +10,8 @@ import com.android.pay.net.HttpUtils;
 import com.android.pay.net.HttpJson;
 import com.android.pay.net.OnHttpListener;
 import com.android.pay.net.RequestParams;
-import com.android.pay.wxlogin.WXLogin;
-import com.android.pay.wxlogin.WXUser;
-import com.android.pay.wxpay.WxPay;
+import com.android.pay.wechat.WeChatLogin;
+import com.android.pay.wechat.WeChatUser;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
@@ -22,23 +21,23 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 import java.util.Map;
 
-public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandler, OnHttpListener {
+public class WeChatLoginActivity extends Activity implements IWXAPIEventHandler, OnHttpListener {
 
     private IWXAPI wxAPI;
     private String TAG = "WXEntryActivity";
     private static final int RETURN_MSG_TYPE_LOGIN = 1; //登录
     private static final int RETURN_MSG_TYPE_SHARE = 2; //分享
 
-    private WXUser user;
+    private WeChatUser user;
     private String openid;
     private String access_token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        user = new WXUser();
-        wxAPI = WXAPIFactory.createWXAPI(this, WXLogin.APP_ID, true);
-        wxAPI.registerApp(WXLogin.APP_ID);
+        user = new WeChatUser();
+        wxAPI = WXAPIFactory.createWXAPI(this, WeChatLogin.APP_ID, true);
+        wxAPI.registerApp(WeChatLogin.APP_ID);
         wxAPI.handleIntent(getIntent(), this);
     }
 
@@ -60,9 +59,9 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
         Intent intent;
         switch (resp.errCode) {
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
-                intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-                intent.putExtra(WXLogin.KEY_CODE, WXLogin.CODE_AUTH_DENIED);
-                intent.putExtra(WXLogin.KEY_MSG, "已拒绝授权微信登录");
+                intent = new Intent(WeChatLogin.WX_LOGIN_ACTION);
+                intent.putExtra(WeChatLogin.KEY_CODE, WeChatLogin.CODE_AUTH_DENIED);
+                intent.putExtra(WeChatLogin.KEY_MSG, "已拒绝授权微信登录");
                 sendBroadcast(intent);
                 Log.i(TAG, "[onResp] -> 拒绝授权微信登录");
                 break;
@@ -73,9 +72,9 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
                 } else if (type == RETURN_MSG_TYPE_SHARE) {
                     message = "取消了微信分享";
                 }
-                intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-                intent.putExtra(WXLogin.KEY_CODE, WXLogin.CODE_USER_CANCEL);
-                intent.putExtra(WXLogin.KEY_MSG, "已拒绝授权微信登录");
+                intent = new Intent(WeChatLogin.WX_LOGIN_ACTION);
+                intent.putExtra(WeChatLogin.KEY_CODE, WeChatLogin.CODE_USER_CANCEL);
+                intent.putExtra(WeChatLogin.KEY_MSG, "已拒绝授权微信登录");
                 sendBroadcast(intent);
                 Log.i(TAG, "[onResp] -> " + message);
                 break;
@@ -85,9 +84,9 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
                     String code = ((SendAuth.Resp) resp).code;
                     Log.i(TAG, "[onResp] -> 用户开始登录微信...");
                     //这里拿到了这个code，去做2次网络请求获取access_token和用户个人信息
-                    intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-                    intent.putExtra(WXLogin.KEY_CODE, WXLogin.CODE_USER_LOADING);
-                    intent.putExtra(WXLogin.KEY_MSG, "用户开始登录微信");
+                    intent = new Intent(WeChatLogin.WX_LOGIN_ACTION);
+                    intent.putExtra(WeChatLogin.KEY_CODE, WeChatLogin.CODE_USER_LOADING);
+                    intent.putExtra(WeChatLogin.KEY_MSG, "用户开始登录微信");
                     sendBroadcast(intent);
                     getAccessToken(code);
                 } else if (type == RETURN_MSG_TYPE_SHARE) {
@@ -100,8 +99,8 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
 
     private void getAccessToken(String code) {
         RequestParams params = new RequestParams();
-        params.add("appid", WXLogin.APP_ID);
-        params.add("secret", WXLogin.APP_SECRET);
+        params.add("appid", WeChatLogin.APP_ID);
+        params.add("secret", WeChatLogin.APP_SECRET);
         params.add("code", code);
         params.add("grant_type", "authorization_code");
         HttpUtils.get(this, "https://api.weixin.qq.com/sns/oauth2/access_token", params, this);
@@ -130,8 +129,8 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
             String scope = accessData.get("scope");
             String unionid = accessData.get("unionid");
 
-            user.setAppId(WXLogin.APP_ID);
-            user.setAppSecret(WXLogin.APP_SECRET);
+            user.setAppId(WeChatLogin.APP_ID);
+            user.setAppSecret(WeChatLogin.APP_SECRET);
             user.setExpiresIn(expires_in);
             user.setRefreshToken(refresh_token);
             user.setScope(scope);
@@ -159,10 +158,10 @@ public class AndroidWXEntryActivity extends Activity implements IWXAPIEventHandl
             user.setCity(city);
             user.setPrivilege(privilege);
 
-            Intent intent = new Intent(WXLogin.WX_LOGIN_ACTION);
-            intent.putExtra(WXLogin.KEY_USER, user);
-            intent.putExtra(WXLogin.KEY_CODE, WXLogin.CODE_LOGIN_SUCCEED);
-            intent.putExtra(WXLogin.KEY_MSG, "登录微信成功");
+            Intent intent = new Intent(WeChatLogin.WX_LOGIN_ACTION);
+            intent.putExtra(WeChatLogin.KEY_USER, user);
+            intent.putExtra(WeChatLogin.KEY_CODE, WeChatLogin.CODE_LOGIN_SUCCEED);
+            intent.putExtra(WeChatLogin.KEY_MSG, "登录微信成功");
             sendBroadcast(intent);
         }
     }
