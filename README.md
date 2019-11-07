@@ -23,7 +23,7 @@ Android支付,主要用户中国常用的微信支付、支付宝支付、银联
 （2）在项目app文件夹下的build.gradle配置如下
 ```
 dependencies {
-	        implementation 'com.github.RelinRan:AndroidPay:1.0.4'
+	        implementation 'com.github.RelinRan:AndroidPay:1.0.5'
 	}
 ```
 ## 方法二  ARR依赖
@@ -44,10 +44,10 @@ dependencies {
 
 ```
 #### 1. 微信支付
-A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承AndroidWXEntryActivity
+A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承WeChatPayActivity
 
 ```
-public class WXPayEntryActivity extends AndroidWXPayEntryActivity {
+public class WXPayEntryActivity extends WeChatPayActivity {
 
 }
 ```
@@ -65,25 +65,25 @@ B.AndroidManifest.xml配置
 C.支付调用
 
 ```
-        WxPay.Builder builder = new WxPay.Builder(this);
-        builder.appId(xx);
-        builder.partnerId(xxx);
-        builder.prepayId(xxx);
-        builder.nonceStr(xxxx);
-        builder.timeStamp(xxxx);
+        WeChatPay.Builder builder = new WeChatPay.Builder(this);
+        builder.appId("xxxx");
+        builder.partnerId("xxx");
+        builder.prepayId("xxx");
+        builder.nonceStr("xxxx");
+        builder.timeStamp("xxxx");
         builder.packageValue("Sign=WXPay");
-        builder.sign(xxxx);
-        builder.listener(new OnWXPayListener() {
+        builder.sign("xxxx");
+        builder.listener(new OnWeChatPayListener() {
 
             @Override
-            public void onWXPay(int code,String msg) {
-                if(code==WxPay.PAY_CODE_SUCCEED){//支付成功
+            public void onWeChatPay(int code,String msg) {
+                if(code==WeChatPay.PAY_CODE_SUCCEED){//支付成功
 
                 }
-                if(code==WxPay.PAY_CODE_CANCEL){//用户取消
+                if(code==WeChat.PAY_CODE_CANCEL){//用户取消
 
                 }
-                if(code==WxPay.PAY_CODE_FAILED){//支付失败
+                if(code==WeChat.PAY_CODE_FAILED){//支付失败
 
                 }
             }
@@ -111,7 +111,7 @@ B.支付调用
 
 ```
      AliPay.Builder builder = new AliPay.Builder(this);
-     builder.orderInfo(data);
+     builder.orderInfo("xxxx");
      builder.listener(new OnAliPayListener() {
 	    
     /**
@@ -163,9 +163,9 @@ B.支付调用
 ```
 
 ####  4.微信登录
-A.需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承AndroidWXEntryActivity
+A.需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承WeChatLoginActivity
 ```
-public class WXEntryActivity extends AndroidWXEntryActivity {
+public class WXEntryActivity extends WeChatLoginActivity {
 
 }
 ```
@@ -180,25 +180,53 @@ B.AndroidManifest.xml配置
 ```
 C.微信登录代码
 ```
-WXLogin.Builder builder = new WXLogin.Builder(context);
+WeChatLogin.Builder builder = new WeChatLogin.Builder(context);
 builder.appId("xxx");
 builder.appSecret("xxx");
 builder.listener(new OnWXLoginListener() {
     @Override
-    public void onWXLogin(int code, String msg, WXUser user) {
-        if (code==WXLogin.CODE_USER_LOADING){//登录中
+    public void onWeChatLogin(int code, String msg, WeChatUser user) {
+        if (code==WeChatLogin.CODE_USER_LOADING){//登录中
 
          }
-        if (code==WXLogin.CODE_LOGIN_SUCCEED){//登录成功
+        if (code==WeChatLogin.CODE_LOGIN_SUCCEED){//登录成功
 
          }
-         if (code==WXLogin.CODE_USER_CANCEL){//用户取消登录
+         if (code==WeChatLogin.CODE_USER_CANCEL){//用户取消登录
 
          }
-         if (code==WXLogin.CODE_AUTH_DENIED){//授权取消
+         if (code==WeChatLogin.CODE_AUTH_DENIED){//授权取消
 
          }
     }
 });
 builder.build();
 ```
+####  5.支付宝登录
+A.在项目AndroidManifest.xml配置如下（注意：<data android:scheme="xxxxxxxxxx"/>这个需要自己配置，最好是自己应用包名）
+```
+<activity android:name="com.alipay.sdk.app.AlipayResultActivity" tools:node="merge">
+    <intent-filter tools:node="replace">
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="xxxxxxxxxx"/>
+    </intent-filter>
+</activity>
+```
+B.支付宝登录代码
+```
+AliLogin.Builder builder = new AliLogin.Builder(this);
+builder.appId("xxxxx");
+builder.scheme("xxxxxx");//必须跟AndroidManifest.xml配置一致
+builder.listener(new OnAliLoginListener() {
+    @Override
+    public void onAliLogin(int resultCode, String memo, AliUser aliUser) {
+        if (resultCode == AliLogin.OK) {
+            //处理你的逻辑，支付宝只有aliUser.getAuthCode()
+        }
+    }
+});
+builder.build();
+```
+
