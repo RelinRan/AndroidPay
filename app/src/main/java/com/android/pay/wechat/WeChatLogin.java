@@ -13,38 +13,9 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 public class WeChatLogin {
 
     /**
-     * 微信登录Action
-     */
-    public static final String WX_LOGIN_ACTION = "ACTION_COM_ANDROID_PAY_WX_LOGIN";
-
-    /**
-     * 微信授权失败
-     */
-    public static final int CODE_AUTH_DENIED = BaseResp.ErrCode.ERR_AUTH_DENIED;
-
-    /**
-     * 微信用户取消登录
-     */
-    public static final int CODE_USER_CANCEL = BaseResp.ErrCode.ERR_USER_CANCEL;
-
-    /**
-     * 微信用户正在登录
-     */
-    public static final int CODE_USER_LOADING = BaseResp.ErrCode.ERR_OK;
-
-    /**
-     * 微信用户登录成功
-     */
-    public static final int CODE_LOGIN_SUCCEED = 1;
-    public static final String KEY_CODE = "code";
-    public static final String KEY_MSG = "msg";
-    public static final String KEY_USER = "user";
-
-    /**
      * 微信appId
      */
     public final String appId;
-    public static String APP_ID;
 
     /**
      * 上下文对象
@@ -55,12 +26,12 @@ public class WeChatLogin {
      * 微信Secret
      */
     public final String appSecret;
-    public static String APP_SECRET;
+
 
     /**
      * 登录接收器
      */
-    private LoginReceiver loginReceiver;
+    private WeChatReceiver receiver;
 
     /**
      * 登录监听
@@ -77,12 +48,12 @@ public class WeChatLogin {
         this.appId = builder.appId;
         this.appSecret = builder.appSecret;
         this.listener = builder.listener;
-        WeChatLogin.APP_ID = appId;
-        WeChatLogin.APP_SECRET = appSecret;
-        if (listener != null && context != null && loginReceiver == null) {
-            loginReceiver = new LoginReceiver();
-            IntentFilter filter = new IntentFilter(WX_LOGIN_ACTION);
-            context.registerReceiver(loginReceiver, filter);
+        WeChatConstants.APP_ID = appId;
+        WeChatConstants.APP_SECRET = appSecret;
+        if (listener != null && context != null && receiver == null) {
+            receiver = new WeChatReceiver();
+            IntentFilter filter = new IntentFilter(WeChatConstants.ACTION);
+            context.registerReceiver(receiver, filter);
         }
         login(appId);
     }
@@ -195,7 +166,7 @@ public class WeChatLogin {
      * @param appId
      */
     private void login(String appId) {
-        WeChatLogin.APP_ID = appId;
+        WeChatConstants.APP_ID = appId;
         IWXAPI wxAPI = WXAPIFactory.createWXAPI(context, appId, true);
         wxAPI.registerApp(appId);
         SendAuth.Req req = new SendAuth.Req();
@@ -207,23 +178,23 @@ public class WeChatLogin {
     /**
      * 登录接收器
      */
-    private class LoginReceiver extends BroadcastReceiver {
+    private class WeChatReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(WX_LOGIN_ACTION)) {
-                int code = intent.getIntExtra(WeChatLogin.KEY_CODE, -200);
-                String msg = intent.getStringExtra(WeChatLogin.KEY_MSG);
-                WeChatUser user = null;
-                if (intent.getSerializableExtra(WeChatLogin.KEY_USER) != null) {
-                    user = (WeChatUser) intent.getSerializableExtra(WeChatLogin.KEY_USER);
+            if (action.equals(WeChatConstants.ACTION)) {
+                int code = intent.getIntExtra(WeChatConstants.CODE, -200);
+                String msg = intent.getStringExtra(WeChatConstants.MSG);
+                WeChatUserInfo user = null;
+                if (intent.getSerializableExtra(WeChatConstants.USER_INFO) != null) {
+                    user = (WeChatUserInfo) intent.getSerializableExtra(WeChatConstants.USER_INFO);
                 }
                 if (listener != null) {
                     listener.onWeChatLogin(code, msg, user);
                 }
-                if (context != null && loginReceiver != null && (code == CODE_LOGIN_SUCCEED || code == CODE_USER_CANCEL || code == CODE_AUTH_DENIED)) {
-                    context.unregisterReceiver(loginReceiver);
+                if (context != null && receiver != null && (code == WeChatConstants.SUCCEED || code == WeChatConstants.USER_CANCEL || code == WeChatConstants.AUTH_DENIED)) {
+                    context.unregisterReceiver(receiver);
                 }
             }
         }

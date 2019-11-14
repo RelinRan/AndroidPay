@@ -46,7 +46,7 @@ public class WeChatShare {
         this.context = context;
         this.openId = openId;
         this.secret = secret;
-        api = WXAPIFactory.createWXAPI(context, WeChatLogin.APP_ID, true);
+        api = WXAPIFactory.createWXAPI(context, WeChatConstants.APP_ID, true);
     }
 
     /**

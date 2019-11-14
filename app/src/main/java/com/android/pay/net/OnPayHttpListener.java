@@ -6,20 +6,20 @@ package com.android.pay.net;
  * on 2017/3/20.
  */
 
-public interface OnHttpListener {
+public interface OnPayHttpListener {
 
     /**
      * get data from http failure method callback
      *
      * @param result response succeed information
      */
-    void onHttpFailure(HttpResponse result);
+    void onHttpFailure(PayHttpResponse result);
 
     /**
      * get data from http succeed method callback
      *
      * @param result response succeed information
      */
-    void onHttpSucceed(HttpResponse result);
+    void onHttpSucceed(PayHttpResponse result);
 
 }

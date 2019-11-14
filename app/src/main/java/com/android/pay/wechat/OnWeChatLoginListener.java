@@ -13,6 +13,6 @@ public interface OnWeChatLoginListener {
      * @param msg
      * @param user
      */
-    void onWeChatLogin(int code, String msg, WeChatUser user);
+    void onWeChatLogin(int code, String msg, WeChatUserInfo user);
 
 }

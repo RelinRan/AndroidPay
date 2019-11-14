@@ -9,7 +9,7 @@ import android.util.Log;
  * on 2018-09-10.
  * Http异步处理类
  */
-public class HttpHandler extends Handler {
+public class PayHandler extends Handler {
 
     //网络请求失败的what
     public static final int WHAT_ON_FAILURE = 0xa01;
@@ -21,8 +21,8 @@ public class HttpHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
-        HttpResponse httpResult = (HttpResponse) msg.obj;
-        OnHttpListener listener = httpResult.listener();
+        PayHttpResponse httpResult = (PayHttpResponse) msg.obj;
+        OnPayHttpListener listener = httpResult.listener();
         printDebugLog(httpResult);
         switch (msg.what) {
             case WHAT_ON_FAILURE:
@@ -47,10 +47,10 @@ public class HttpHandler extends Handler {
      * @param e             异常
      * @param listener      网络请求监听
      */
-    public void sendExceptionMsg(RequestParams requestParams, String url, int code, Exception e, OnHttpListener listener) {
+    public void sendExceptionMsg(PayRequestParams requestParams, String url, int code, Exception e, OnPayHttpListener listener) {
         Message msg = obtainMessage();
-        msg.what = HttpHandler.WHAT_ON_FAILURE;
-        HttpResponse response = new HttpResponse();
+        msg.what = PayHandler.WHAT_ON_FAILURE;
+        PayHttpResponse response = new PayHttpResponse();
         response.requestParams(requestParams);
         response.url(url);
         response.exception(e);
@@ -69,15 +69,15 @@ public class HttpHandler extends Handler {
      * @param result        请求结果
      * @param listener      网络请求监听
      */
-    public void sendSuccessfulMsg(RequestParams requestParams, String url, int code, String result, OnHttpListener listener) {
-        HttpResponse response = new HttpResponse();
+    public void sendSuccessfulMsg(PayRequestParams requestParams, String url, int code, String result, OnPayHttpListener listener) {
+        PayHttpResponse response = new PayHttpResponse();
         response.body(result);
         response.url(url);
         response.requestParams(requestParams);
         response.code(code);
         response.listener(listener);
         Message msg = this.obtainMessage();
-        msg.what = HttpHandler.WHAT_ON_SUCCEED;
+        msg.what = PayHandler.WHAT_ON_SUCCEED;
         msg.obj = response;
         sendMessage(msg);
     }
@@ -87,7 +87,7 @@ public class HttpHandler extends Handler {
      *
      * @param httpResult
      */
-    private void printDebugLog(HttpResponse httpResult) {
+    private void printDebugLog(PayHttpResponse httpResult) {
         StringBuffer logBuffer = new StringBuffer("Program interface debug mode");
         logBuffer.append("\n");
         logBuffer.append("┌──────────────────────────────────────");
@@ -107,12 +107,6 @@ public class HttpHandler extends Handler {
             paramsBuffer.append(",");
             paramsBuffer.append("│\"" + httpResult.requestParams().getStringBody() + "\"");
             paramsBuffer.append("\n");
-        }
-        if (httpResult.requestParams().getFileParams() != null) {
-            for (String key : httpResult.requestParams().getFileParams().keySet()) {
-                paramsBuffer.append("│\"" + key + "\":" + "\"" + httpResult.requestParams().getFileParams().get(key).getAbsolutePath() + "\"");
-                paramsBuffer.append("\n");
-            }
         }
         if (paramsBuffer.toString().length() != 0) {
             logBuffer.append("\n");

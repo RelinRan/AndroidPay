@@ -3,7 +3,6 @@ package com.android.pay.net;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.text.TextUtils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -21,11 +20,7 @@ import java.util.concurrent.Executors;
 
 import javax.net.ssl.HttpsURLConnection;
 
-/**
- * Created by Relin
- * on 2018-09-10.
- */
-public class HttpUtils {
+public class PayHttp {
 
     /**
      * 编码格式
@@ -44,78 +39,43 @@ public class HttpUtils {
      */
     private static final String BOUNDARY = UUID.randomUUID().toString();
 
-    /**
-     * 地址对象
-     */
-    private static URL httpUrl;
 
-    /**
-     * Http异步处理
-     */
-    private static HttpHandler httpHandler;
-
-    /**
-     * 服务器连接对象
-     */
-    private static HttpURLConnection conn;
-
-    /**
-     * 连接池
-     */
+    private static PayHandler httpHandler;
     private static ExecutorService executorService;
 
-    private HttpUtils() {
-
-    }
-
     static {
-
-        httpHandler = new HttpHandler();
+        httpHandler = new PayHandler();
         executorService = Executors.newFixedThreadPool(10);
     }
 
-    /**
-     * 青内存
-     */
-    public static void destroy() {
-        if (httpHandler != null) {
-            httpHandler.removeCallbacksAndMessages(null);
-            httpHandler = null;
-        }
-    }
 
     /**
      * 创建服务器连接
      *
      * @param url           地址
      * @param requestMethod 请求方式 GET / POST
-     * @param params        请求参数
      * @return
      */
-    protected static HttpURLConnection createHttpURLConnection(String url, String requestMethod, RequestParams params) {
+    protected static HttpURLConnection createHttpURLConnection(String url, String requestMethod) {
+        HttpURLConnection conn = null;
         try {
-            httpUrl = new URL(url);
+            URL httpUrl = new URL(url);
             boolean isHttps = url.startsWith("https");
             //https
             if (isHttps) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) httpUrl.openConnection();
-                httpsURLConnection.setSSLSocketFactory(HttpsSSLSocketFactory.factory());
-                httpsURLConnection.setHostnameVerifier(new HttpsHostnameVerifier());
+                httpsURLConnection.setSSLSocketFactory(PayHttpsSSLSocketFactory.factory());
+                httpsURLConnection.setHostnameVerifier(new PayHttpsHostnameVerifier());
                 conn = httpsURLConnection;
             } else {
                 conn = (HttpURLConnection) httpUrl.openConnection();
             }
             conn.setInstanceFollowRedirects(true);
             conn.setRequestMethod(requestMethod);
-            conn.setReadTimeout((int) (RequestParams.DEFAULT_TIME_OUT * 1000));
-            conn.setConnectTimeout((int) (RequestParams.DEFAULT_TIME_OUT * 1000));
-            Map<Integer, String> options = params.getOptionParams();
-            if (!TextUtils.isEmpty(options.get(RequestParams.CONNECT_TIME_OUT))) {
-                conn.setReadTimeout(Integer.parseInt(options.get(RequestParams.READ_TIME_OUT)) * 1000);
-            }
-            if (!TextUtils.isEmpty(options.get(RequestParams.READ_TIME_OUT))) {
-                conn.setConnectTimeout(Integer.parseInt(options.get(RequestParams.CONNECT_TIME_OUT)) * 1000);
-            }
+            conn.setReadTimeout(30 * 1000);
+            conn.setConnectTimeout(30 * 1000);
+            conn.setReadTimeout(30 * 1000);
+            conn.setConnectTimeout(30 * 1000);
             conn.setDoInput(true);
             conn.setUseCaches(false);
             if (requestMethod.equals("POST")) {
@@ -124,23 +84,8 @@ public class HttpUtils {
             //设置请求头参数
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.setRequestProperty("Charset", "UTF-8");
-            String agent = params.getOptionParams().get(RequestParams.USER_AGENT);
-            conn.setRequestProperty("User-Agent", TextUtils.isEmpty(agent) ? "Android" : agent);
-            if (params.getOptionParams().get(RequestParams.REQUEST_CONTENT_TYPE).equals(RequestParams.REQUEST_CONTENT_FORM)) {
-                conn.setRequestProperty("Content-Type", "multipart/form-data" + ";boundary=" + BOUNDARY);
-            }
-            if (params.getOptionParams().get(RequestParams.REQUEST_CONTENT_TYPE).equals(RequestParams.REQUEST_CONTENT_JSON)) {
-                conn.setRequestProperty("Content-Type", "application/json");
-            }
-            if (params.getOptionParams().get(RequestParams.REQUEST_CONTENT_TYPE).equals(RequestParams.REQUEST_CONTENT_STRING)) {
-                conn.setRequestProperty("Content-Type", "application/octet-stream" + ";boundary=" + BOUNDARY);
-            }
-            //添加头部
-            if (params != null && params.getHeaderParams() != null) {
-                for (Map.Entry<String, String> entry : params.getHeaderParams().entrySet()) {
-                    conn.setRequestProperty("\"" + entry.getKey() + "\"", "\"" + entry.getValue() + "\"");
-                }
-            }
+            conn.setRequestProperty("User-Agent", "Android");
+            conn.setRequestProperty("Content-Type", "multipart/form-data" + ";boundary=" + BOUNDARY);
             conn.connect();
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -152,6 +97,7 @@ public class HttpUtils {
         return conn;
     }
 
+
     /**
      * 创建Get请求url地址
      *
@@ -159,7 +105,7 @@ public class HttpUtils {
      * @param params 请求参数
      * @return
      */
-    protected static String createGetUrl(String url, RequestParams params) {
+    protected static String createGetUrl(String url, PayRequestParams params) {
         StringBuffer requestUrl = new StringBuffer();
         requestUrl.append(url);
         requestUrl.append("?");
@@ -183,7 +129,7 @@ public class HttpUtils {
      * @param conn   服务器连接对象
      * @param params 参数
      */
-    protected static void addPostParams(HttpURLConnection conn, RequestParams params) {
+    protected static void addPostParams(HttpURLConnection conn, PayRequestParams params) {
         DataOutputStream dos;
         try {
             dos = new DataOutputStream(conn.getOutputStream());
@@ -192,25 +138,16 @@ public class HttpUtils {
                 //单个数据字符 --- 一般支付上面需要
                 if (params.getStringParams() != null) {
                     //表单数据
-                    if (params.getOptionParams().get(RequestParams.REQUEST_CONTENT_TYPE).equals(RequestParams.REQUEST_CONTENT_FORM)) {
-                        Map<String, String> map = params.getStringParams();
-                        StringBuilder sb = new StringBuilder();
-                        for (Map.Entry<String, String> entry : map.entrySet()) {
-                            sb.append(buildPostStringParams(entry.getKey(), entry.getValue()));
-                        }
-                        dos.writeBytes(sb.toString());
+                    Map<String, String> map = params.getStringParams();
+                    StringBuilder sb = new StringBuilder();
+                    for (Map.Entry<String, String> entry : map.entrySet()) {
+                        sb.append(buildPostStringParams(entry.getKey(), entry.getValue()));
                     }
-                    //纯字符参数
-                    if (params.getOptionParams().get(RequestParams.REQUEST_CONTENT_TYPE).equals(RequestParams.REQUEST_CONTENT_STRING)) {
-                        if (params.getStringBody() != null) {
-                            dos.writeBytes(params.getStringBody());
-                        }
-                    }
-                    //json文字参数
-                    if (params.getOptionParams().get(RequestParams.REQUEST_CONTENT_TYPE).equals(RequestParams.REQUEST_CONTENT_JSON)) {
-                        String stringParams = JsonEscape.escape(HttpJson.parseMap(params.getStringParams()));
-                        dos.writeBytes(stringParams);
-                    }
+                    dos.writeBytes(sb.toString());
+                }
+                //纯字符参数
+                if (params.getStringBody() != null) {
+                    dos.writeBytes(params.getStringBody());
                 }
             }
             //请求结束标志
@@ -220,91 +157,6 @@ public class HttpUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * 请求
-     *
-     * @param requestMethod
-     * @param url
-     * @param params
-     * @param listener
-     */
-    protected static void request(final String requestMethod, final String url, final RequestParams params, final OnHttpListener listener) {
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                if (requestMethod.equals("GET")) {
-                    createHttpURLConnection(createGetUrl(url, params), requestMethod, params);
-                }
-                if (requestMethod.equals("POST")) {
-                    addPostParams(createHttpURLConnection(url, requestMethod, params), params);
-                }
-                int code = -1;
-                try {
-                    code = conn.getResponseCode();
-                    if (code == 200) {
-                        InputStream inputStream = conn.getInputStream();
-                        //获取返回数据
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                        String line;
-                        StringBuffer sb = new StringBuffer();
-                        while ((line = bufferedReader.readLine()) != null) {
-                            sb.append(line);
-                        }
-                        httpHandler.sendSuccessfulMsg(params, url, code, sb.toString(), listener);
-                    } else {
-                        httpHandler.sendExceptionMsg(params, url, code, new IOException(HttpHandler.HTTP_NO_RESPONSE), listener);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    httpHandler.sendExceptionMsg(params, url, code, e, listener);
-                } finally {
-                    conn.disconnect();
-                    conn = null;
-                }
-            }
-        });
-    }
-
-    /**
-     * Get请求参数
-     *
-     * @param url      请求地址
-     * @param params   参数
-     * @param listener 监听
-     */
-    public static void get(Context context, String url, RequestParams params, OnHttpListener listener) {
-        if (!isAvailable(context)) {
-            HttpResponse response = new HttpResponse();
-            response.url(url);
-            response.code(-11);
-            response.requestParams(params);
-            response.exception(new Exception("No network connection, unable to request data interface."));
-            listener.onHttpFailure(response);
-            return;
-        }
-        request("GET", url, params, listener);
-    }
-
-    /**
-     * Post请求
-     *
-     * @param url      请求地址
-     * @param params   参数
-     * @param listener 监听
-     */
-    public static void post(Context context, String url, RequestParams params, OnHttpListener listener) {
-        if (!isAvailable(context)) {
-            HttpResponse response = new HttpResponse();
-            response.url(url);
-            response.code(-11);
-            response.requestParams(params);
-            response.exception(new Exception("No network connection, unable to request data interface."));
-            listener.onHttpFailure(response);
-            return;
-        }
-        request("POST", url, params, listener);
     }
 
 
@@ -329,23 +181,89 @@ public class HttpUtils {
         return sb;
     }
 
+
     /**
-     * 创建Post请求的文件参数
+     * 请求
      *
-     * @param key
-     * @param value
-     * @return
+     * @param requestMethod
+     * @param url
+     * @param params
+     * @param listener
      */
-    protected static StringBuilder buildPostFileParams(String key, String value) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PREFIX);
-        sb.append(BOUNDARY);
-        sb.append(LINE_FEED);
-        sb.append("Content-Disposition: form-data; name=\"" + key + "\"; filename=\"" + value + "\"" + LINE_FEED);
-        sb.append("Content-Type: " + MediaTypeRecognition.identifyMediaType(value) + LINE_FEED); //此处的ContentType不同于 请求头 中Content-Type
-        sb.append("Content-Transfer-Encoding: 8bit" + LINE_FEED);
-        sb.append(LINE_FEED);// 参数头设置完以后需要两个换行，然后才是参数内容
-        return sb;
+    protected static void request(final HttpURLConnection conn, final String requestMethod, final String url, final PayRequestParams params, final OnPayHttpListener listener) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                if (requestMethod.equals("GET")) {
+                    createHttpURLConnection(createGetUrl(url, params), requestMethod);
+                }
+                if (requestMethod.equals("POST")) {
+                    addPostParams(createHttpURLConnection(url, requestMethod), params);
+                }
+                int code = -1;
+                try {
+                    code = conn.getResponseCode();
+                    if (code == 200) {
+                        InputStream inputStream = conn.getInputStream();
+                        //获取返回数据
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                        String line;
+                        StringBuffer sb = new StringBuffer();
+                        while ((line = bufferedReader.readLine()) != null) {
+                            sb.append(line);
+                        }
+                        httpHandler.sendSuccessfulMsg(params, url, code, sb.toString(), listener);
+                    } else {
+                        httpHandler.sendExceptionMsg(params, url, code, new IOException(PayHandler.HTTP_NO_RESPONSE), listener);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    httpHandler.sendExceptionMsg(params, url, code, e, listener);
+                } finally {
+                    conn.disconnect();
+                }
+            }
+        });
+    }
+
+    /**
+     * Get请求参数
+     *
+     * @param url      请求地址
+     * @param params   参数
+     * @param listener 监听
+     */
+    public static void get(Context context, String url, PayRequestParams params, OnPayHttpListener listener) {
+        if (!isAvailable(context)) {
+            PayHttpResponse response = new PayHttpResponse();
+            response.url(url);
+            response.code(-11);
+            response.requestParams(params);
+            response.exception(new Exception("No network connection, unable to request data interface."));
+            listener.onHttpFailure(response);
+            return;
+        }
+        request(createHttpURLConnection(url, "POST"), "GET", url, params, listener);
+    }
+
+    /**
+     * Post请求
+     *
+     * @param url      请求地址
+     * @param params   参数
+     * @param listener 监听
+     */
+    public static void post(Context context, String url, PayRequestParams params, OnPayHttpListener listener) {
+        if (!isAvailable(context)) {
+            PayHttpResponse response = new PayHttpResponse();
+            response.url(url);
+            response.code(-11);
+            response.requestParams(params);
+            response.exception(new Exception("No network connection, unable to request data interface."));
+            listener.onHttpFailure(response);
+            return;
+        }
+        request(createHttpURLConnection(url, "POST"), "POST", url, params, listener);
     }
 
 

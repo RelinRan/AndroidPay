@@ -6,17 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import com.android.pay.net.HttpResponse;
-import com.android.pay.net.HttpUtils;
-import com.android.pay.net.OnHttpListener;
-import com.android.pay.net.RequestParams;
 import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
-import java.util.TreeMap;
 
 
 /**
@@ -27,7 +19,7 @@ import java.util.TreeMap;
  * MCH_ID
  * API_KEY
  */
-public class WeChatPay implements OnHttpListener {
+public class WeChatPay {
 
     //微信支付的广播
     public static final String ACTION_PAY_FINISH = "ACTION_PAY_FINISH";
@@ -43,17 +35,7 @@ public class WeChatPay implements OnHttpListener {
     private IWXAPI iwxapi;
 
     public final Context context;
-
-    //旧版本参数
     public final String appId;
-    public final String mchId;
-    public final String apiKey;
-    public final String outTradeNo;
-    public final String body;
-    public final String totalFree;
-    public final String notifyUrl;
-
-    //版本二的参数
     public final String partnerId;
     public final String prepayId;
     public final String nonceStr;
@@ -69,16 +51,7 @@ public class WeChatPay implements OnHttpListener {
     public static class Builder {
 
         private Context context;
-        //旧版本参数
         private String appId;
-        private String mchId;
-        private String apiKey;
-        private String outTradeNo;
-        private String body;
-        private String totalFree;
-        private String notifyUrl;
-
-        //版本二的参数
         private String partnerId;
         private String prepayId;
         private String nonceStr;
@@ -99,60 +72,6 @@ public class WeChatPay implements OnHttpListener {
 
         public Builder appId(String appId) {
             this.appId = appId;
-            return this;
-        }
-
-        public String mchId() {
-            return mchId;
-        }
-
-        public Builder mchId(String mchId) {
-            this.mchId = mchId;
-            return this;
-        }
-
-        public String apiKey() {
-            return apiKey;
-        }
-
-        public Builder apiKey(String apiKey) {
-            this.apiKey = apiKey;
-            return this;
-        }
-
-        public String outTradeNo() {
-            return outTradeNo;
-        }
-
-        public Builder outTradeNo(String outTradeNo) {
-            this.outTradeNo = outTradeNo;
-            return this;
-        }
-
-        public String totalFree() {
-            return totalFree;
-        }
-
-        public Builder totalFree(String totalFree) {
-            this.totalFree = totalFree;
-            return this;
-        }
-
-        public String body() {
-            return body;
-        }
-
-        public Builder body(String body) {
-            this.body = body;
-            return this;
-        }
-
-        public String notifyUrl() {
-            return notifyUrl;
-        }
-
-        public Builder notifyUrl(String notifyUrl) {
-            this.notifyUrl = notifyUrl;
             return this;
         }
 
@@ -236,15 +155,7 @@ public class WeChatPay implements OnHttpListener {
 
     public WeChatPay(Builder builder) {
         this.context = builder.context;
-
         this.appId = builder.appId;
-        this.mchId = builder.mchId;
-        this.apiKey = builder.apiKey;
-        this.outTradeNo = builder.outTradeNo;
-        this.body = builder.body;
-        this.totalFree = builder.totalFree;
-        this.notifyUrl = builder.notifyUrl;
-
         this.partnerId = builder.partnerId;
         this.prepayId = builder.prepayId;
         this.nonceStr = builder.nonceStr;
@@ -252,7 +163,6 @@ public class WeChatPay implements OnHttpListener {
         this.packageValue = builder.packageValue;
         this.sign = builder.sign;
         this.extData = builder.extData;
-
         this.listener = builder.listener;
         if (listener != null && receiver == null) {
             IntentFilter filter = new IntentFilter(WeChatPay.ACTION_PAY_FINISH);
@@ -265,98 +175,20 @@ public class WeChatPay implements OnHttpListener {
     }
 
     public void pay() {
-        //新版本
-        if (sign != null) {
-            PayReq req = new PayReq();
-            req.appId = appId;
-            req.partnerId = partnerId;
-            req.prepayId = prepayId;
-            req.nonceStr = nonceStr;
-            req.timeStamp = timeStamp;
-            req.packageValue = packageValue;
-            req.sign = sign;
-            req.extData = extData;
-            Log.i(this.getClass().getSimpleName(), "appId:" + appId + ",partnerId:" + partnerId + ",prepayId:" + prepayId + ",nonceStr:" + nonceStr + ",timeStamp:" + timeStamp + ",packageValue:" + packageValue + ",sign:" + sign + ",extData:" + extData);
-            iwxapi.registerApp(appId);
-            iwxapi.sendReq(req);
-        }
-        //旧版本
-        if (apiKey != null) {
-            try {
-                getPrepayId(outTradeNo, body, totalFree, notifyUrl);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * 下单获取PrepayId
-     */
-    private void getPrepayId(String out_trade_no, String body, String total_free, String notify_url) throws UnsupportedEncodingException {
-        TreeMap<String, String> params = new TreeMap<>();
-        //公众账号ID
-        params.put("appid", appId);
-        //商品描述
-        params.put("body", body);
-        //商户号
-        params.put("mch_id", mchId);
-        //随机字符串
-        params.put("nonce_str", WeChatUtils.getNonceStr());
-        //异步通知Url
-        params.put("notify_url", notify_url);
-        //商户订单号
-        params.put("out_trade_no", out_trade_no == null ? WeChatUtils.getOutTradNo() : out_trade_no);
-        //终端IP
-        params.put("spbill_create_ip", WeChatUtils.getLocalIpAddress(context));
-        //总金额
-        params.put("total_fee", WeChatUtils.parseMoneyToFen(total_free));
-        //交易类型 https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=4_2
-        params.put("trade_type", "APP");
-        //签名
-        String sign = WeChatUtils.getSign(context, apiKey, params);
-        params.put("sign", sign);
-        //参数转xml
-        String xmlString = WeChatUtils.paramsToXml(params);
-        Log.i(this.getClass().getSimpleName(), "getPrepayId 参数：" + xmlString);
-        //xutils工具类不需要字符转换
-        String prePayXml = new String(xmlString.toString().getBytes(), "ISO8859-1");
-        RequestParams requestParameter = new RequestParams();
-        requestParameter.addStringBody(prePayXml);
-        String url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-        HttpUtils.post(context, url, requestParameter, this);
-    }
-
-    @Override
-    public void onHttpSucceed(HttpResponse result) {
-        Map<String, String> map = WeChatUtils.decodeXml(result.body());
-        Log.i(this.getClass().getSimpleName(), "onHttpSuccess result：" + result);
-        PayReq payReq = new PayReq();
-        payReq.appId = appId;
-        payReq.partnerId = mchId;
-        payReq.prepayId = map.get("prepay_id");
-        payReq.packageValue = "Sign=WXPay";
-        payReq.nonceStr = WeChatUtils.getNonceStr();
-        payReq.timeStamp = String.valueOf(WeChatUtils.getTimeStamp());
-        //签名
-        TreeMap<String, String> signParams = new TreeMap<>();
-        signParams.put("appid", payReq.appId);
-        signParams.put("noncestr", payReq.nonceStr);
-        signParams.put("package", payReq.packageValue);
-        signParams.put("partnerid", payReq.partnerId);
-        signParams.put("prepayid", payReq.prepayId);
-        signParams.put("timestamp", payReq.timeStamp);
-        payReq.sign = WeChatUtils.getSign(context, apiKey, signParams);
-        //注册App
+        PayReq req = new PayReq();
+        req.appId = appId;
+        req.partnerId = partnerId;
+        req.prepayId = prepayId;
+        req.nonceStr = nonceStr;
+        req.timeStamp = timeStamp;
+        req.packageValue = packageValue;
+        req.sign = sign;
+        req.extData = extData;
+        Log.i(this.getClass().getSimpleName(), "-[pay]->" + "appId:" + appId + ",partnerId:" + partnerId + ",prepayId:" + prepayId + ",nonceStr:" + nonceStr + ",timeStamp:" + timeStamp + ",packageValue:" + packageValue + ",sign:" + sign + ",extData:" + extData);
         iwxapi.registerApp(appId);
-        //调用支付
-        iwxapi.sendReq(payReq);
+        iwxapi.sendReq(req);
     }
 
-    @Override
-    public void onHttpFailure(HttpResponse result) {
-
-    }
 
     private class WXPayReceiver extends BroadcastReceiver {
 

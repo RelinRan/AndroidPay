@@ -27,7 +27,7 @@ import java.util.Map;
  * 接口的请不要用此类做转换。
  */
 
-public class HttpJson {
+public class PayJson {
 
 
     /**

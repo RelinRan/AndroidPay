@@ -9,7 +9,7 @@ import javax.net.ssl.X509TrustManager;
  * Created by Relin
  * on 2018-11-01.
  */
-public class HttpsX509TrustManager implements X509TrustManager{
+public class PayHttpsX509TrustManager implements X509TrustManager{
     @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 
