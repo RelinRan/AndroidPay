@@ -12,42 +12,179 @@ import com.tencent.mm.opensdk.modelmsg.WXTextObject;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
+/**
+ * 微信分享
+ */
 public class WeChatShare {
 
     /**
-     * 分享到对话
+     * 会话场景
      */
-    public static final int SCENE_MESSAGE = SendMessageToWX.Req.WXSceneSession;
+    public static final int SCENE_SESSION = SendMessageToWX.Req.WXSceneSession;
 
     /**
-     * 分享到朋友圈
+     * 朋友圈场景
      */
-    public static final int SCENE_FRIEND_CIRCLE = SendMessageToWX.Req.WXSceneTimeline;
+    public static final int SCENE_TIME_LINE = SendMessageToWX.Req.WXSceneTimeline;
 
     /**
-     * 分享到收藏
+     * 收藏场景
      */
     public static final int SCENE_FAVORITE = SendMessageToWX.Req.WXSceneFavorite;
 
+
+    /**
+     * 微信api对象
+     */
     private IWXAPI api;
 
     /**
-     * 场景
+     * 上下文对象
      */
-    private String scene;
+    public final Context context;
 
-    private String openId;
+    /**
+     * 微信appId
+     */
+    public final String appId;
 
-    private String secret;
+    /**
+     * 分享场景
+     */
+    public final int scene;
 
-    private Context context;
+    /**
+     * 文本
+     */
+    public final String text;
 
-    public WeChatShare(Context context, String openId, String secret) {
-        this.context = context;
-        this.openId = openId;
-        this.secret = secret;
+    /**
+     * 分享构造函数
+     *
+     * @param builder 分享构建者
+     */
+    public WeChatShare(Builder builder) {
+        this.context = builder.context;
+        this.appId = builder.appId;
+        this.scene = builder.scene;
+        this.text = builder.text;
         api = WXAPIFactory.createWXAPI(context, WeChatConstants.APP_ID, true);
+        api.registerApp(appId);
+        shareText(text);
     }
+
+    /**
+     * 构建者
+     */
+    public static class Builder {
+
+        /**
+         * 上下文对象
+         */
+        private Context context;
+
+        /**
+         * 微信appId
+         */
+        private String appId;
+
+        /**
+         * 分享场景
+         */
+        private int scene;
+
+        /**
+         * 文本
+         */
+        private String text;
+
+        /**
+         * 分享构建者
+         *
+         * @param context
+         */
+        public Builder(Context context) {
+            this.context = context;
+        }
+
+        /**
+         * 上下文对象
+         *
+         * @return
+         */
+        public Context context() {
+            return context;
+        }
+
+        /**
+         * 微信appId
+         *
+         * @return
+         */
+        public String appId() {
+            return appId;
+        }
+
+        /**
+         * 设置微信appId
+         *
+         * @param appId
+         * @return
+         */
+        public Builder appId(String appId) {
+            this.appId = appId;
+            return this;
+        }
+
+        /**
+         * 会话场景
+         *
+         * @return
+         */
+        public int scene() {
+            return scene;
+        }
+
+        /**
+         * 设置会话场景
+         *
+         * @param scene
+         * @return
+         */
+        public Builder scene(int scene) {
+            this.scene = scene;
+            return this;
+        }
+
+        /**
+         * 文本内容
+         *
+         * @return
+         */
+        public String text() {
+            return text;
+        }
+
+        /**
+         * 设置文本内容
+         *
+         * @param text
+         */
+        public void text(String text) {
+            this.text = text;
+        }
+
+        /**
+         * 构建分享对象进行分享
+         *
+         * @return
+         */
+        public WeChatShare build() {
+            return new WeChatShare(this);
+        }
+
+    }
+
 
     /**
      * 分享纯文本
@@ -62,7 +199,7 @@ public class WeChatShare {
         WXMediaMessage msg = new WXMediaMessage();
         msg.mediaObject = textObj;
         msg.description = text;
-        sendReq("text" + System.currentTimeMillis(), msg, SendMessageToWX.Req.WXSceneSession, openId);
+        sendReq("text" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
@@ -80,7 +217,7 @@ public class WeChatShare {
         //设置缩略图
         msg.thumbData = thumbData;
         msg.mediaObject = imgObj;
-        sendReq("image" + System.currentTimeMillis(), msg, SendMessageToWX.Req.WXSceneSession, openId);
+        sendReq("image" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
@@ -97,7 +234,7 @@ public class WeChatShare {
         //设置缩略图
         msg.thumbData = thumbData;
         msg.mediaObject = imgObj;
-        sendReq("image" + System.currentTimeMillis(), msg, SendMessageToWX.Req.WXSceneSession, openId);
+        sendReq("image" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
@@ -113,7 +250,7 @@ public class WeChatShare {
         //设置缩略图
         msg.thumbData = thumbData;
         msg.mediaObject = imgObj;
-        sendReq("image" + System.currentTimeMillis(), msg, SendMessageToWX.Req.WXSceneSession, openId);
+        sendReq("image" + System.currentTimeMillis(), msg, scene, "");
     }
 
 
@@ -130,7 +267,7 @@ public class WeChatShare {
         req.transaction = transaction;
         req.message = message;
         req.scene = scene;
-        req.openId = openId;
+//        req.openId = openId;
         api.sendReq(req);
     }
 

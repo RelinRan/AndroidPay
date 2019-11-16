@@ -49,7 +49,6 @@ public class WeChatUserInfo implements Serializable {
      */
     private String privilege;
 
-
     public void setCountry(String country) {
         this.country = country;
     }

@@ -2,17 +2,34 @@ package com.android.pay.wechat;
 
 import com.tencent.mm.opensdk.modelbase.BaseResp;
 
+/**
+ * 微信常量</br>
+ */
 public class WeChatConstants {
 
-    public static final String URL_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token";
-
-
-    public static final String URL_USER_INFO= "https://api.weixin.qq.com/sns/userinfo";
-
+    /**
+     * 微信appId
+     */
     public static String APP_ID;
 
+    /**
+     * 微信secret
+     */
     public static String APP_SECRET;
 
+    /**
+     * 微信Token地址
+     */
+    public static final String URL_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token";
+
+    /**
+     * 微信用户信息地址
+     */
+    public static final String URL_USER_INFO = "https://api.weixin.qq.com/sns/userinfo";
+
+    /**
+     * 微信授权类型
+     */
     public static final String GRANT_TYPE = "authorization_code";
 
     /**
@@ -35,14 +52,39 @@ public class WeChatConstants {
      */
     public static final int USER_LOADING = BaseResp.ErrCode.ERR_OK;
 
-
+    /**
+     * 微信登录
+     */
     public static final int LOGIN = 1;
+
+    /**
+     * 微信分享
+     */
     public static final int SHARE = 2;
 
+    /**
+     * 成功
+     */
     public static final int SUCCEED = 1;
+
+    /**
+     * 代码
+     */
     public static final String CODE = "code";
+
+    /**
+     * 消息
+     */
     public static final String MSG = "msg";
+
+    /**
+     * 用户信息
+     */
     public static final String USER_INFO = "user_info";
+
+    /**
+     * 授权信息
+     */
     public static final String ACCESS_TOKEN_INFO = "access_token_info";
 
 }
