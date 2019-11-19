@@ -3,7 +3,7 @@ package com.android.pay.wechat;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.annotation.IdRes;
+import android.text.TextUtils;
 
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXImageObject;
@@ -54,9 +54,45 @@ public class WeChatShare {
     public final int scene;
 
     /**
+     * 消息标题
+     */
+    public final String title;
+
+    /**
+     * 消息描述
+     */
+    public final String description;
+
+    /**
+     * 缩略图的二进制数据,内容大小不超过 10MB
+     */
+    public final byte[] thumbData;
+
+    /**
+     * 缩略图位图数据,内容大小不超过 10MB
+     */
+    public final Bitmap thumbImage;
+
+    /**
+     * 缩略图大小
+     */
+    public final int thumbSize;
+
+    /**
      * 文本
      */
     public final String text;
+
+    /**
+     * 图片的二进制数据,内容大小不超过 10MB
+     */
+    public final byte[] imageData;
+
+    /**
+     * 图片的本地路径  对应图片内容大小不超过 10MB
+     */
+    public final String imagePath;
+
 
     /**
      * 分享构造函数
@@ -67,10 +103,19 @@ public class WeChatShare {
         this.context = builder.context;
         this.appId = builder.appId;
         this.scene = builder.scene;
+        this.title = builder.title;
+        this.description = builder.description;
+        this.thumbData = builder.thumbData;
+        this.thumbImage = builder.thumbImage;
+        this.thumbSize = builder.thumbSize;
         this.text = builder.text;
+        this.imageData = builder.imageData;
+        this.imagePath = builder.imagePath;
         api = WXAPIFactory.createWXAPI(context, WeChatConstants.APP_ID, true);
         api.registerApp(appId);
         shareText(text);
+        shareImage(imagePath);
+        shareImage(imageData);
     }
 
     /**
@@ -93,10 +138,46 @@ public class WeChatShare {
          */
         private int scene;
 
+
+        /**
+         * 消息标题
+         */
+        private String title;
+
+        /**
+         * 消息描述
+         */
+        private String description;
+
+        /**
+         * 缩略图的二进制数据,内容大小不超过 10MB
+         */
+        private byte[] thumbData;
+
+        /**
+         * 缩略图位图数据,内容大小不超过 10MB
+         */
+        private Bitmap thumbImage;
+
+        /**
+         * 缩略图大小
+         */
+        private int thumbSize = 120;
+
         /**
          * 文本
          */
         private String text;
+
+        /**
+         * 图片的二进制数据,内容大小不超过 10MB
+         */
+        private byte[] imageData;
+
+        /**
+         * 图片的本地路径  对应图片内容大小不超过 10MB
+         */
+        private String imagePath;
 
         /**
          * 分享构建者
@@ -157,6 +238,86 @@ public class WeChatShare {
         }
 
         /**
+         * 消息标题
+         *
+         * @return
+         */
+        public String title() {
+            return title;
+        }
+
+        /**
+         * 设置消息标题
+         *
+         * @param title
+         */
+        public void title(String title) {
+            this.title = title;
+        }
+
+        /**
+         * 描述信息
+         *
+         * @return
+         */
+        public String description() {
+            return description;
+        }
+
+        /**
+         * 描述信息
+         *
+         * @param description
+         */
+        public void description(String description) {
+            this.description = description;
+        }
+
+        /**
+         * 缩略图的二进制数据,内容大小不超过 10MB
+         *
+         * @return
+         */
+        public byte[] thumbData() {
+            return thumbData;
+        }
+
+        /**
+         * 缩略图的二进制数据,内容大小不超过 10MB
+         *
+         * @param thumbData
+         */
+        public void thumbData(byte[] thumbData) {
+            this.thumbData = thumbData;
+        }
+
+        public int getThumbSize() {
+            return thumbSize;
+        }
+
+        public void setThumbSize(int thumbSize) {
+            this.thumbSize = thumbSize;
+        }
+
+        /**
+         * 分享图片的缩略图，内容大小不超过 10MB
+         *
+         * @return
+         */
+        public Bitmap thumbImage() {
+            return thumbImage;
+        }
+
+        /**
+         * 分享图片的缩略图，内容大小不超过 10MB
+         *
+         * @return
+         */
+        public void thumbImage(Bitmap thumbImage) {
+            this.thumbImage = thumbImage;
+        }
+
+        /**
          * 文本内容
          *
          * @return
@@ -175,6 +336,42 @@ public class WeChatShare {
         }
 
         /**
+         * 图片的二进制数据
+         *
+         * @return
+         */
+        public byte[] imageData() {
+            return imageData;
+        }
+
+        /**
+         * 图片的二进制数据,内容大小不超过 10MB
+         *
+         * @param imageData
+         */
+        public void imageData(byte[] imageData) {
+            this.imageData = imageData;
+        }
+
+        /**
+         * 图片的本地路径,对应图片内容大小不超过 10MB
+         *
+         * @return
+         */
+        public String imagePath() {
+            return imagePath;
+        }
+
+        /**
+         * 图片的本地路径,对应图片内容大小不超过 10MB
+         *
+         * @param imagePath
+         */
+        public void imagePath(String imagePath) {
+            this.imagePath = imagePath;
+        }
+
+        /**
          * 构建分享对象进行分享
          *
          * @return
@@ -185,17 +382,17 @@ public class WeChatShare {
 
     }
 
-
     /**
      * 分享纯文本
      *
      * @param text 纯文本
      */
     public void shareText(String text) {
-        //初始化一个 WXTextObject 对象，填写分享的文本内容
+        if (TextUtils.isEmpty(text)) {
+            return;
+        }
         WXTextObject textObj = new WXTextObject();
         textObj.text = text;
-        //用 WXTextObject 对象初始化一个 WXMediaMessage 对象
         WXMediaMessage msg = new WXMediaMessage();
         msg.mediaObject = textObj;
         msg.description = text;
@@ -203,52 +400,48 @@ public class WeChatShare {
     }
 
     /**
-     * 分享图片
-     *
-     * @param id
-     * @param thumbData
+     * 分享本地图片
      */
-    public void shareImage(@IdRes int id, byte[] thumbData) {
-        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), id);
-        //初始化 WXImageObject 和 WXMediaMessage 对象
-        WXImageObject imgObj = new WXImageObject(bmp);
+    public void shareImage(String imagePath) {
+        if (TextUtils.isEmpty(imagePath)) {
+            return;
+        }
+        WXImageObject imgObj = new WXImageObject();
+        imgObj.imagePath = imagePath;
         WXMediaMessage msg = new WXMediaMessage();
-        bmp.recycle();
-        //设置缩略图
-        msg.thumbData = thumbData;
+        if (!TextUtils.isEmpty(title)) {
+            msg.title = title;
+        }
+        if (!TextUtils.isEmpty(description)) {
+            msg.description = description;
+        }
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+        Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, thumbSize, thumbSize, true);
+        msg.thumbData = ShareHelper.decodeBitmap(thumbBmp);
         msg.mediaObject = imgObj;
         sendReq("image" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
-     * 分享图片
+     * 分享二进制图片
      *
-     * @param bitmap
-     * @param thumbData
+     * @param imageData
      */
-    public void shareImage(Bitmap bitmap, byte[] thumbData) {
-        //初始化 WXImageObject 和 WXMediaMessage 对象
-        WXImageObject imgObj = new WXImageObject(bitmap);
+    public void shareImage(byte[] imageData) {
+        if (imageData == null && imageData.length == 0) {
+            return;
+        }
+        WXImageObject imgObj = new WXImageObject();
+        imgObj.imagePath = imagePath;
+        imgObj.imageData = imageData;
         WXMediaMessage msg = new WXMediaMessage();
-        bitmap.recycle();
-        //设置缩略图
-        msg.thumbData = thumbData;
-        msg.mediaObject = imgObj;
-        sendReq("image" + System.currentTimeMillis(), msg, scene, "");
-    }
-
-    /**
-     * 分享图片
-     *
-     * @param image
-     * @param thumbData
-     */
-    public void shareImage(byte[] image, byte[] thumbData) {
-        //初始化 WXImageObject 和 WXMediaMessage 对象
-        WXImageObject imgObj = new WXImageObject(image);
-        WXMediaMessage msg = new WXMediaMessage();
-        //设置缩略图
-        msg.thumbData = thumbData;
+        if (!TextUtils.isEmpty(title)) {
+            msg.title = title;
+        }
+        if (!TextUtils.isEmpty(description)) {
+            msg.description = description;
+        }
+        msg.thumbData = imageData;
         msg.mediaObject = imgObj;
         sendReq("image" + System.currentTimeMillis(), msg, scene, "");
     }
@@ -267,8 +460,9 @@ public class WeChatShare {
         req.transaction = transaction;
         req.message = message;
         req.scene = scene;
-//        req.openId = openId;
+//      req.openId = openId;
         api.sendReq(req);
     }
+
 
 }
