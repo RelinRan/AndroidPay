@@ -28,7 +28,6 @@ public class WeChatLogin {
      */
     public final String appSecret;
 
-
     /**
      * 登录接收器
      */
