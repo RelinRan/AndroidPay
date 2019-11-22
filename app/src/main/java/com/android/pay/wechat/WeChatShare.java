@@ -8,7 +8,9 @@ import android.text.TextUtils;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXImageObject;
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.WXMusicObject;
 import com.tencent.mm.opensdk.modelmsg.WXTextObject;
+import com.tencent.mm.opensdk.modelmsg.WXVideoObject;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
@@ -93,6 +95,36 @@ public class WeChatShare {
      */
     public final String imagePath;
 
+    /**
+     * 音频网页的 URL 地址,限制长度不超过 10KB
+     */
+    public final String musicUrl;
+
+    /**
+     * 供低带宽环境下使用的音频网页 URL 地址,限制长度不超过 10KB
+     */
+    public final String musicLowBandUrl;
+
+    /**
+     * 音频数据的 URL 地址,限制长度不超过 10KB
+     */
+    public final String musicDataUrl;
+
+    /**
+     * 供低带宽环境下使用的音频数据 URL 地址,限制长度不超过 10KB
+     */
+    public final String musicLowBandDataUrl;
+
+
+    /**
+     * 视频链接,限制长度不超过 10KB
+     */
+    public final String videoUrl;
+
+    /**
+     * 供低带宽的环境下使用的视频链接,限制长度不超过 10KB
+     */
+    public final String videoLowBandUrl;
 
     /**
      * 分享构造函数
@@ -111,11 +143,19 @@ public class WeChatShare {
         this.text = builder.text;
         this.imageData = builder.imageData;
         this.imagePath = builder.imagePath;
+        this.musicUrl = builder.musicUrl;
+        this.musicLowBandUrl = builder.musicLowBandUrl;
+        this.musicDataUrl = builder.musicDataUrl;
+        this.musicLowBandDataUrl = builder.musicLowBandDataUrl;
+        this.videoUrl = builder.videoUrl;
+        this.videoLowBandUrl = builder.videoLowBandUrl;
         api = WXAPIFactory.createWXAPI(context, WeChatConstants.APP_ID, true);
         api.registerApp(appId);
-        shareText(text);
-        shareImage(imagePath);
-        shareImage(imageData);
+        shareText();
+        shareImage();
+        shareImage();
+        shareMusic();
+        shareVideo();
     }
 
     /**
@@ -178,6 +218,36 @@ public class WeChatShare {
          * 图片的本地路径  对应图片内容大小不超过 10MB
          */
         private String imagePath;
+
+        /**
+         * 音频网页的 URL 地址,限制长度不超过 10KB
+         */
+        private String musicUrl;
+
+        /**
+         * 供低带宽环境下使用的音频网页 URL 地址,限制长度不超过 10KB
+         */
+        private String musicLowBandUrl;
+
+        /**
+         * 音频数据的 URL 地址,限制长度不超过 10KB
+         */
+        private String musicDataUrl;
+
+        /**
+         * 供低带宽环境下使用的音频数据 URL 地址,限制长度不超过 10KB
+         */
+        private String musicLowBandDataUrl;
+
+        /**
+         * 视频链接,限制长度不超过 10KB
+         */
+        private String videoUrl;
+
+        /**
+         * 供低带宽的环境下使用的视频链接,限制长度不超过 10KB
+         */
+        private String videoLowBandUrl;
 
         /**
          * 分享构建者
@@ -372,6 +442,120 @@ public class WeChatShare {
         }
 
         /**
+         * 音频网页的 URL 地址,限制长度不超过 10KB
+         *
+         * @return
+         */
+        public String musicUrl() {
+            return musicUrl;
+        }
+
+        /**
+         * 音频网页的 URL 地址,限制长度不超过 10KB
+         *
+         * @param musicUrl
+         */
+        public Builder musicUrl(String musicUrl) {
+            this.musicUrl = musicUrl;
+            return this;
+        }
+
+        /**
+         * 供低带宽环境下使用的音频网页 URL 地址,限制长度不超过 10KB
+         *
+         * @return
+         */
+        public String musicLowBandUrl() {
+            return musicLowBandUrl;
+        }
+
+        /**
+         * 供低带宽环境下使用的音频网页 URL 地址,限制长度不超过 10KB
+         *
+         * @return
+         */
+        public Builder musicLowBandUrl(String musicLowBandUrl) {
+            this.musicLowBandUrl = musicLowBandUrl;
+            return this;
+        }
+
+        /**
+         * 音频数据的URL地址,限制长度不超过 10KB
+         *
+         * @return
+         */
+        public String musicDataUrl() {
+            return musicDataUrl;
+        }
+
+        /**
+         * 音频数据的 URL 地址,限制长度不超过 10KB
+         *
+         * @param musicDataUrl
+         */
+        public Builder musicDataUrl(String musicDataUrl) {
+            this.musicDataUrl = musicDataUrl;
+            return this;
+        }
+
+        /**
+         * 供低带宽环境下使用的音频数据 URL 地址,限制长度不超过 10KB
+         *
+         * @return
+         */
+        public String musicLowBandDataUrl() {
+            return musicLowBandDataUrl;
+        }
+
+        /**
+         * 供低带宽环境下使用的音频数据 URL 地址,限制长度不超过 10KB
+         *
+         * @param musicLowBandDataUrl
+         */
+        public Builder musicLowBandDataUrl(String musicLowBandDataUrl) {
+            this.musicLowBandDataUrl = musicLowBandDataUrl;
+            return this;
+        }
+
+        /**
+         * 视频链接,限制长度不超过10KB
+         *
+         * @return
+         */
+        public String videoUrl() {
+            return videoUrl;
+        }
+
+        /**
+         * 视频链接,限制长度不超过10KB
+         *
+         * @param videoUrl
+         */
+        public Builder videoUrl(String videoUrl) {
+            this.videoUrl = videoUrl;
+            return this;
+        }
+
+        /**
+         * 供低带宽的环境下使用的视频链接,限制长度不超过10KB
+         *
+         * @return
+         */
+        public String videoLowBandUrl() {
+            return videoLowBandUrl;
+        }
+
+        /**
+         * 供低带宽的环境下使用的视频链接,限制长度不超过10KB
+         *
+         * @return
+         */
+        public Builder videoLowBandUrl(String videoLowBandUrl) {
+            this.videoLowBandUrl = videoLowBandUrl;
+            return this;
+        }
+
+        /**
          * 构建分享对象进行分享
          *
          * @return
@@ -384,26 +568,26 @@ public class WeChatShare {
 
     /**
      * 分享纯文本
-     *
-     * @param text 纯文本
      */
-    public void shareText(String text) {
-        if (TextUtils.isEmpty(text)) {
+    public void shareText() {
+        if (text == null) {
             return;
         }
         WXTextObject textObj = new WXTextObject();
         textObj.text = text;
         WXMediaMessage msg = new WXMediaMessage();
         msg.mediaObject = textObj;
-        msg.description = text;
+        if (!TextUtils.isEmpty(text)) {
+            msg.description = text;
+        }
         sendReq("text" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
      * 分享本地图片
      */
-    public void shareImage(String imagePath) {
-        if (TextUtils.isEmpty(imagePath)) {
+    public void shareImage() {
+        if (imagePath == null && (imageData == null || imageData.length == 0)) {
             return;
         }
         WXImageObject imgObj = new WXImageObject();
@@ -415,35 +599,81 @@ public class WeChatShare {
         if (!TextUtils.isEmpty(description)) {
             msg.description = description;
         }
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-        Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, thumbSize, thumbSize, true);
-        msg.thumbData = ShareHelper.decodeBitmap(thumbBmp);
+        if (!TextUtils.isEmpty(imagePath)) {
+            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+            Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, thumbSize, thumbSize, true);
+            msg.thumbData = ShareHelper.decodeBitmap(thumbBmp);
+        }
+        if (imageData != null && imageData.length != 0) {
+            msg.thumbData = imageData;
+        }
         msg.mediaObject = imgObj;
         sendReq("image" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
-     * 分享二进制图片
-     *
-     * @param imageData
+     * 分享音乐
      */
-    public void shareImage(byte[] imageData) {
-        if (imageData == null && imageData.length == 0) {
+    public void shareMusic() {
+        if (musicUrl == null && musicLowBandDataUrl == null && musicDataUrl == null && musicLowBandUrl == null) {
             return;
         }
-        WXImageObject imgObj = new WXImageObject();
-        imgObj.imagePath = imagePath;
-        imgObj.imageData = imageData;
+        WXMusicObject music = new WXMusicObject();
+        if (!TextUtils.isEmpty(musicUrl)) {
+            music.musicUrl = musicUrl;
+        }
+        if (!TextUtils.isEmpty(musicLowBandDataUrl)) {
+            music.musicLowBandDataUrl = musicLowBandDataUrl;
+        }
+        if (!TextUtils.isEmpty(musicDataUrl)) {
+            music.musicDataUrl = musicDataUrl;
+        }
+        if (!TextUtils.isEmpty(musicLowBandUrl)) {
+            music.musicLowBandUrl = musicLowBandUrl;
+        }
         WXMediaMessage msg = new WXMediaMessage();
+        msg.mediaObject = music;
         if (!TextUtils.isEmpty(title)) {
             msg.title = title;
         }
         if (!TextUtils.isEmpty(description)) {
             msg.description = description;
         }
-        msg.thumbData = imageData;
-        msg.mediaObject = imgObj;
-        sendReq("image" + System.currentTimeMillis(), msg, scene, "");
+        if (thumbImage != null) {
+            Bitmap bitmap = Bitmap.createScaledBitmap(thumbImage, thumbSize, thumbSize, true);
+            msg.thumbData = ShareHelper.decodeBitmap(bitmap);
+        }
+        if (thumbData != null && thumbData.length != 0) {
+            msg.thumbData = thumbData;
+        }
+        sendReq("music" + System.currentTimeMillis(), msg, scene, "");
+    }
+
+    /**
+     * 分享视频
+     */
+    public void shareVideo() {
+        if (videoUrl == null && thumbData == null && (thumbData == null || thumbData.length == 0)) {
+            return;
+        }
+        WXVideoObject video = new WXVideoObject();
+        if (!TextUtils.isEmpty(videoUrl)) {
+            video.videoUrl = videoUrl;
+        }
+        if (!TextUtils.isEmpty(videoLowBandUrl)) {
+            video.videoLowBandUrl = videoLowBandUrl;
+        }
+        WXMediaMessage msg = new WXMediaMessage(video);
+        msg.title = title;
+        msg.description = description;
+        if (thumbImage != null) {
+            Bitmap bitmap = Bitmap.createScaledBitmap(thumbImage, thumbSize, thumbSize, true);
+            msg.thumbData = ShareHelper.decodeBitmap(bitmap);
+        }
+        if (thumbData != null && thumbData.length != 0) {
+            msg.thumbData = thumbData;
+        }
+        sendReq("video" + System.currentTimeMillis(), msg, scene, "");
     }
 
 
