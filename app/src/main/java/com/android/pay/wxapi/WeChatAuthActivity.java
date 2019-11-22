@@ -131,8 +131,8 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
         if (result.url().contains(WeChatConstants.URL_USER_INFO)) {
             userInfo = Json.parseJSONObject(WeChatUserInfo.class, result.body());
             Intent intent = new Intent(WeChatConstants.ACTION);
-            intent.putExtra(WeChatConstants.USER_INFO, accessToken);
-            intent.putExtra(WeChatConstants.ACCESS_TOKEN_INFO, userInfo);
+            intent.putExtra(WeChatConstants.ACCESS_TOKEN_INFO, accessToken);
+            intent.putExtra(WeChatConstants.USER_INFO, userInfo);
             intent.putExtra(WeChatConstants.CODE, WeChatConstants.SUCCEED);
             intent.putExtra(WeChatConstants.MSG, "登录成功");
             sendBroadcast(intent);

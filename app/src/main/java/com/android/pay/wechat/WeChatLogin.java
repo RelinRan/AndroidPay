@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
@@ -184,6 +185,7 @@ public class WeChatLogin {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(WeChatConstants.ACTION)) {
+                Log.i("WeChatReceiver","-[登录接收器]->");
                 int code = intent.getIntExtra(WeChatConstants.CODE, -200);
                 String msg = intent.getStringExtra(WeChatConstants.MSG);
                 WeChatUserInfo user = null;
