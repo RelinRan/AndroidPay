@@ -22,8 +22,8 @@ public class ShareHelper {
         try {
             File file = new File(path);
             FileInputStream fis = new FileInputStream(file);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
-            byte[] b = new byte[1000];
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
+            byte[] b = new byte[1024];
             int n;
             while ((n = fis.read(b)) != -1) {
                 bos.write(b, 0, n);

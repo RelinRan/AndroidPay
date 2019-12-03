@@ -12,7 +12,7 @@ import com.android.pay.net.RequestParams;
 import com.android.pay.net.Response;
 import com.android.pay.wechat.WeChatAccessToken;
 import com.android.pay.wechat.WeChatConstants;
-import com.android.pay.wechat.WeChatUserInfo;
+import com.android.pay.wechat.WeChatUser;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
@@ -31,7 +31,7 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
     private IWXAPI api;
     private String TAG = "WeChatAuthActivity";
     private int type;
-    private WeChatUserInfo userInfo;
+    private WeChatUser userInfo;
     private WeChatAccessToken accessToken;
 
     @Override
@@ -129,7 +129,7 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
             reqUserInfo(accessToken.getAccess_token(), accessToken.getOpenid(), "zh-CN");
         }
         if (result.url().contains(WeChatConstants.URL_USER_INFO)) {
-            userInfo = Json.parseJSONObject(WeChatUserInfo.class, result.body());
+            userInfo = Json.parseJSONObject(WeChatUser.class, result.body());
             Intent intent = new Intent(WeChatConstants.ACTION);
             intent.putExtra(WeChatConstants.ACCESS_TOKEN_INFO, accessToken);
             intent.putExtra(WeChatConstants.USER_INFO, userInfo);
