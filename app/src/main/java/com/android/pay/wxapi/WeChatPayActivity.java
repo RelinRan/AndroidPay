@@ -58,6 +58,7 @@ public class WeChatPayActivity extends Activity implements IWXAPIEventHandler {
             intent.putExtra(WeChatPay.PAY_MSG, msg);
             sendBroadcast(intent);
         }
+        finish();
     }
 
     @Override
