@@ -1,7 +1,10 @@
 # AndroidPay
 
-#### 介绍
-Android支付,主要用户中国常用的微信支付、支付宝支付、银联支付
+#### 功能介绍
+支持微信支付、支付宝支付、银联支付;
+支持微信分享;
+支持微信登录;
+支持微信分享;
 
 #### 软件架构
 只要采用Builder模式
@@ -23,7 +26,7 @@ Android支付,主要用户中国常用的微信支付、支付宝支付、银联
 （2）在项目app文件夹下的build.gradle配置如下
 ```
 dependencies {
-	        implementation 'com.github.RelinRan:AndroidPay:1.0.5'
+	        implementation 'com.github.RelinRan:AndroidPay:1.0.6'
 	}
 ```
 ## 方法二  ARR依赖
@@ -77,13 +80,13 @@ C.支付调用
 
             @Override
             public void onWeChatPay(int code,String msg) {
-                if(code==WeChatPay.PAY_CODE_SUCCEED){//支付成功
+                if(code==WeChatConstants.SUCCEED){//支付成功
 
                 }
-                if(code==WeChat.PAY_CODE_CANCEL){//用户取消
+                if(code==WeChatConstants.CANCEL){//用户取消
 
                 }
-                if(code==WeChat.PAY_CODE_FAILED){//支付失败
+                if(code==WeChatConstants.FAILED){//支付失败
 
                 }
             }
@@ -163,20 +166,20 @@ B.支付调用
 ```
 
 ####  4.微信登录
-A.需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承WeChatLoginActivity
+A.需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承WeChatAuthActivity
 ```
-public class WXEntryActivity extends WeChatLoginActivity {
+public class WXEntryActivity extends WeChatAuthActivity {
 
 }
 ```
 B.AndroidManifest.xml配置
 
 ```
-        <activity
-            android:name=".wxapi.WXEntryActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:exported="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
+<activity
+       android:name=".wxapi.WXEntryActivity"
+       android:configChanges="keyboardHidden|orientation|screenSize"
+       android:exported="true"
+       android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
 ```
 C.微信登录代码
 ```
@@ -186,16 +189,16 @@ builder.appSecret("xxx");
 builder.listener(new OnWXLoginListener() {
     @Override
     public void onWeChatLogin(int code, String msg, WeChatUser user) {
-        if (code==WeChatLogin.CODE_USER_LOADING){//登录中
+        if (code==WeChatConstants.LOADING){//登录中
 
          }
-        if (code==WeChatLogin.CODE_LOGIN_SUCCEED){//登录成功
+        if (code==WeChatConstants.SUCCEED){//登录成功
 
          }
-         if (code==WeChatLogin.CODE_USER_CANCEL){//用户取消登录
+         if (code==WeChatConstants.CANCEL){//用户取消登录
 
          }
-         if (code==WeChatLogin.CODE_AUTH_DENIED){//授权取消
+         if (code==WeChatConstants.AUTH_DENIED){//授权取消
 
          }
     }
@@ -229,4 +232,106 @@ builder.listener(new OnAliLoginListener() {
 });
 builder.build();
 ```
+####  6.微信分享
+A.需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承WeChatAuthActivity
+```
+public class WXEntryActivity extends WeChatAuthActivity {
 
+}
+```
+B.微信分享代码
+因为根据官方文档集成，其中参数名字也跟官方文档一致，目前只是加了一个thumUrl不跟官方文档一致，为了方便缩略图使用网络图片。
+其他的参数参考官方文档：https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Share_and_Favorites/Android.html
+
+B-1.图片分享代码
+```
+WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.appId(Constants.WE_CHAT_APP_ID);
+builder.scene(WeChatShare.SCENE_SESSION);
+builder.title("标题");
+builder.description("描述信息");
+//缩略图设置
+builder.thumbImage(bitmap);//或 builder.thumbUrl("http://xxxxxx"); 或builder.thumbData(byte[]);
+builder.imagePath("本地图片地址");//或者builder.imageUrl("http://xxxxxx");
+builder.listener(new OnWeChatShareListener() {
+    @Override
+    public void onWeChatShare(int code, String msg) {
+        //分享回调，官方目前取消了回调，不管是否正确分享都会进入。
+    }
+});
+builder.build();
+```
+
+B-2.视频分享代码
+```
+WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.appId(Constants.WE_CHAT_APP_ID);
+builder.scene(WeChatShare.SCENE_SESSION);
+builder.title("标题");
+builder.description("描述信息");
+//缩略图设置
+builder.thumbImage(bitmap);//或 builder.thumbUrl("http://xxxxxx"); 或builder.thumbData(byte[]);
+builder.videoUrl("视频网络地址");
+builder.listener(new OnWeChatShareListener() {
+    @Override
+    public void onWeChatShare(int code, String msg) {
+        //分享回调，官方目前取消了回调，不管是否正确分享都会进入。
+        if (code==WeChatConstants.SUCCEED){//成功
+
+         }
+         if (code==WeChatConstants.CANCEL){//取消
+
+         }
+    }
+});
+builder.build();
+```
+
+B-3.网页分享代码
+```
+WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.appId(Constants.WE_CHAT_APP_ID);
+builder.scene(WeChatShare.SCENE_SESSION);
+builder.title("标题");
+builder.description("描述信息");
+//缩略图设置
+builder.thumbImage(bitmap);//或 builder.thumbUrl("http://xxxxxx"); 或builder.thumbData(byte[]);
+builder.webpageUrl("网络地址");
+builder.listener(new OnWeChatShareListener() {
+    @Override
+    public void onWeChatShare(int code, String msg) {
+        //分享回调，官方目前取消了回调，不管是否正确分享都会进入。
+        if (code==WeChatConstants.SUCCEED){//成功
+
+         }
+         if (code==WeChatConstants.CANCEL){//取消
+
+         }
+    }
+});
+builder.build();
+```
+B-4.音乐分享代码
+```
+WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.appId(Constants.WE_CHAT_APP_ID);
+builder.scene(WeChatShare.SCENE_SESSION);
+builder.title("标题");
+builder.description("描述信息");
+//缩略图设置
+builder.thumbImage(bitmap);//或 builder.thumbUrl("http://xxxxxx"); 或builder.thumbData(byte[]);
+builder.musicUrl("网络地址");
+builder.listener(new OnWeChatShareListener() {
+    @Override
+    public void onWeChatShare(int code, String msg) {
+        //分享回调，官方目前取消了回调，不管是否正确分享都会进入。
+        if (code==WeChatConstants.SUCCEED){//成功
+
+         }
+         if (code==WeChatConstants.CANCEL){//取消
+
+         }
+    }
+});
+builder.build();
+```
