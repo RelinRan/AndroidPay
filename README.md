@@ -240,7 +240,7 @@ public class WXEntryActivity extends WeChatAuthActivity {
 }
 ```
 B.微信分享代码
-因为根据官方文档集成，其中参数名字也跟官方文档一致，目前只是加了一个thumUrl不跟官方文档一致，为了方便缩略图使用网络图片。
+因为根据官方文档集成，其中参数名字也跟官方文档一致，目前只是加了一个thumUrl和imageUrl不跟官方文档一致，为了方便缩略图和图片分享使用网络图片;
 其他的参数参考官方文档：https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Share_and_Favorites/Android.html
 
 B-1.图片分享代码
