@@ -8,6 +8,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class ShareHelper {
 
@@ -63,6 +67,39 @@ public class ShareHelper {
         } else {
             return null;
         }
+    }
+
+    /**
+     * 图片转为byte数组
+     *
+     * @param path
+     * @return
+     */
+    public static byte[] decodeUrl(String path){
+        byte[] data = null;
+        URL url;
+        InputStream input;
+        try {
+            url = new URL(path);
+            HttpURLConnection httpUrl = (HttpURLConnection) url.openConnection();
+            httpUrl.connect();
+            httpUrl.getInputStream();
+            input = httpUrl.getInputStream();
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            byte[] buf = new byte[1024];
+            int numBytesRead;
+            while ((numBytesRead = input.read(buf)) != -1) {
+                output.write(buf, 0, numBytesRead);
+            }
+            data = output.toByteArray();
+            output.close();
+            input.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
     }
 
 }

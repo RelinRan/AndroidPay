@@ -76,6 +76,11 @@ public class WeChatShare {
     public final Bitmap thumbImage;
 
     /**
+     * 缩略图位图数据,内容大小不超过 10MB
+     */
+    public final String thumbUrl;
+
+    /**
      * 缩略图大小
      */
     public final int thumbSize;
@@ -139,6 +144,7 @@ public class WeChatShare {
         this.description = builder.description;
         this.thumbData = builder.thumbData;
         this.thumbImage = builder.thumbImage;
+        this.thumbUrl = builder.thumbUrl;
         this.thumbSize = builder.thumbSize;
         this.text = builder.text;
         this.imageData = builder.imageData;
@@ -198,6 +204,11 @@ public class WeChatShare {
          * 缩略图位图数据,内容大小不超过 10MB
          */
         private Bitmap thumbImage;
+
+        /**
+         * 缩略图位图数据,内容大小不超过 10MB
+         */
+        private String thumbUrl;
 
         /**
          * 缩略图大小
@@ -361,11 +372,41 @@ public class WeChatShare {
             this.thumbData = thumbData;
         }
 
-        public int getThumbSize() {
+        /**
+         * 缩略图的网络地址,内容大小不超过 10MB
+         *
+         * @return
+         */
+        public String thumbUrl() {
+            return thumbUrl;
+        }
+
+        /**
+         * 缩略图的网络地址,内容大小不超过 10MB
+         *
+         * @param thumbUrl
+         * @return
+         */
+        public Builder thumbUrl(String thumbUrl) {
+            this.thumbUrl = thumbUrl;
+            return this;
+        }
+
+        /**
+         * 缩略图大小
+         *
+         * @return
+         */
+        public int thumbSize() {
             return thumbSize;
         }
 
-        public void setThumbSize(int thumbSize) {
+        /**
+         * 缩略图大小
+         *
+         * @param thumbSize
+         */
+        public void thumbSize(int thumbSize) {
             this.thumbSize = thumbSize;
         }
 
@@ -604,8 +645,11 @@ public class WeChatShare {
             Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, thumbSize, thumbSize, true);
             msg.thumbData = ShareHelper.decodeBitmap(thumbBmp);
         }
-        if (imageData != null && imageData.length != 0) {
-            msg.thumbData = imageData;
+        if (thumbData != null && thumbData.length != 0) {
+            msg.thumbData = thumbData;
+        }
+        if (thumbUrl != null && thumbUrl.length() != 0) {
+            msg.thumbData = ShareHelper.decodeUrl(thumbUrl);
         }
         msg.mediaObject = imgObj;
         sendReq("image" + System.currentTimeMillis(), msg, scene, "");
@@ -646,6 +690,9 @@ public class WeChatShare {
         if (thumbData != null && thumbData.length != 0) {
             msg.thumbData = thumbData;
         }
+        if (thumbUrl != null && thumbUrl.length() != 0) {
+            msg.thumbData = ShareHelper.decodeUrl(thumbUrl);
+        }
         sendReq("music" + System.currentTimeMillis(), msg, scene, "");
     }
 
@@ -672,6 +719,9 @@ public class WeChatShare {
         }
         if (thumbData != null && thumbData.length != 0) {
             msg.thumbData = thumbData;
+        }
+        if (thumbUrl != null && thumbUrl.length() != 0) {
+            msg.thumbData = ShareHelper.decodeUrl(thumbUrl);
         }
         sendReq("video" + System.currentTimeMillis(), msg, scene, "");
     }
