@@ -33,9 +33,9 @@ public class WeChatConstants {
     public static final String GRANT_TYPE = "authorization_code";
 
     /**
-     * 微信登录Action
+     * 微信Action
      */
-    public static final String ACTION = "ACTION_COM_ANDROID_PAY_WX_LOGIN";
+    public static final String ACTION = "ACTION_COM_ANDROID_PAY_WX_ACTION";
 
     /**
      * 微信授权失败
@@ -45,12 +45,12 @@ public class WeChatConstants {
     /**
      * 微信用户取消登录
      */
-    public static final int USER_CANCEL = BaseResp.ErrCode.ERR_USER_CANCEL;
+    public static final int CANCEL = BaseResp.ErrCode.ERR_USER_CANCEL;
 
     /**
      * 微信用户正在登录
      */
-    public static final int USER_LOADING = BaseResp.ErrCode.ERR_OK;
+    public static final int LOADING = BaseResp.ErrCode.ERR_OK;
 
     /**
      * 微信登录
@@ -66,6 +66,11 @@ public class WeChatConstants {
      * 成功
      */
     public static final int SUCCEED = 1;
+
+    /**
+     * 失败
+     */
+    public static final int FAILED = -1;
 
     /**
      * 代码

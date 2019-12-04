@@ -1,6 +1,9 @@
 package com.android.pay.wechat;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
@@ -11,6 +14,7 @@ import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
 import com.tencent.mm.opensdk.modelmsg.WXMusicObject;
 import com.tencent.mm.opensdk.modelmsg.WXTextObject;
 import com.tencent.mm.opensdk.modelmsg.WXVideoObject;
+import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
@@ -101,6 +105,12 @@ public class WeChatShare {
     public final String imagePath;
 
     /**
+     * 图片的网络路径  对应图片内容大小不超过 10MB
+     */
+    public final String imageUrl;
+
+
+    /**
      * 音频网页的 URL 地址,限制长度不超过 10KB
      */
     public final String musicUrl;
@@ -132,6 +142,18 @@ public class WeChatShare {
     public final String videoLowBandUrl;
 
     /**
+     * html 链接,限制长度不超过 10KB
+     */
+    public final String webpageUrl;
+
+    /**
+     * 分享回调函数
+     */
+    public final OnWeChatShareListener listener;
+
+    private WeChatReceiver receiver;
+
+    /**
      * 分享构造函数
      *
      * @param builder 分享构建者
@@ -149,20 +171,45 @@ public class WeChatShare {
         this.text = builder.text;
         this.imageData = builder.imageData;
         this.imagePath = builder.imagePath;
+        this.imageUrl = builder.imageUrl;
         this.musicUrl = builder.musicUrl;
         this.musicLowBandUrl = builder.musicLowBandUrl;
         this.musicDataUrl = builder.musicDataUrl;
         this.musicLowBandDataUrl = builder.musicLowBandDataUrl;
         this.videoUrl = builder.videoUrl;
         this.videoLowBandUrl = builder.videoLowBandUrl;
+        this.webpageUrl = builder.webpageUrl;
+        this.listener = builder.listener;
+        share();
+    }
+
+    /**
+     * 分享
+     */
+    private void share() {
+        if (listener != null && context != null && receiver == null) {
+            receiver = new WeChatReceiver();
+            IntentFilter filter = new IntentFilter(WeChatConstants.ACTION);
+            context.registerReceiver(receiver, filter);
+        }
         api = WXAPIFactory.createWXAPI(context, WeChatConstants.APP_ID, true);
         api.registerApp(appId);
         shareText();
-        shareImage();
-        shareImage();
+        if (imageUrl != null) {
+            ShareHelper.decodeUrl(imageUrl, new ShareHelper.OnUrlDecodeByteListener() {
+                @Override
+                public void onUrlDecode(byte[] data) {
+                    shareImage(data);
+                }
+            });
+        } else {
+            shareImage(null);
+        }
         shareMusic();
+        shareWebPage();
         shareVideo();
     }
+
 
     /**
      * 构建者
@@ -183,7 +230,6 @@ public class WeChatShare {
          * 分享场景
          */
         private int scene;
-
 
         /**
          * 消息标题
@@ -231,6 +277,11 @@ public class WeChatShare {
         private String imagePath;
 
         /**
+         * 图片的网络路径  对应图片内容大小不超过 10MB
+         */
+        private String imageUrl;
+
+        /**
          * 音频网页的 URL 地址,限制长度不超过 10KB
          */
         private String musicUrl;
@@ -259,6 +310,16 @@ public class WeChatShare {
          * 供低带宽的环境下使用的视频链接,限制长度不超过 10KB
          */
         private String videoLowBandUrl;
+
+        /**
+         * html链接,限制长度不超过 10KB
+         */
+        private String webpageUrl;
+
+        /**
+         * 分享回调
+         */
+        private OnWeChatShareListener listener;
 
         /**
          * 分享构建者
@@ -483,6 +544,24 @@ public class WeChatShare {
         }
 
         /**
+         * 图片的网络路径,对应图片内容大小不超过 10MB
+         *
+         * @return
+         */
+        public String imageUrl() {
+            return imageUrl;
+        }
+
+        /**
+         * 图片的网络路径,对应图片内容大小不超过 10MB
+         *
+         * @return
+         */
+        public void imageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
+        }
+
+        /**
          * 音频网页的 URL 地址,限制长度不超过 10KB
          *
          * @return
@@ -597,6 +676,40 @@ public class WeChatShare {
         }
 
         /**
+         * html 链接,限制长度不超过 10KB
+         * @return
+         */
+        public String webageUrl() {
+            return webpageUrl;
+        }
+
+        /**
+         * html 链接,限制长度不超过10KB
+         * @param webpageUrl
+         */
+        public void webpageUrl(String webpageUrl) {
+            this.webpageUrl = webpageUrl;
+        }
+
+        /**
+         * 分享回调函数
+         *
+         * @return
+         */
+        public OnWeChatShareListener listener() {
+            return listener;
+        }
+
+        /**
+         * 分享回调
+         *
+         * @param listener
+         */
+        public void listener(OnWeChatShareListener listener) {
+            this.listener = listener;
+        }
+
+        /**
          * 构建分享对象进行分享
          *
          * @return
@@ -610,7 +723,7 @@ public class WeChatShare {
     /**
      * 分享纯文本
      */
-    public void shareText() {
+    private void shareText() {
         if (text == null) {
             return;
         }
@@ -621,18 +734,23 @@ public class WeChatShare {
         if (!TextUtils.isEmpty(text)) {
             msg.description = text;
         }
-        sendReq("text" + System.currentTimeMillis(), msg, scene, "");
+        shareMessage("text" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
      * 分享本地图片
      */
-    public void shareImage() {
-        if (imagePath == null && (imageData == null || imageData.length == 0)) {
+    private void shareImage(byte[] imageData) {
+        if (imagePath == null) {
             return;
         }
         WXImageObject imgObj = new WXImageObject();
-        imgObj.imagePath = imagePath;
+        if (imagePath != null) {
+            imgObj.imagePath = imagePath;
+        }
+        if (imageData != null && imageData.length != 0) {
+            imgObj.imageData = imageData;
+        }
         WXMediaMessage msg = new WXMediaMessage();
         if (!TextUtils.isEmpty(title)) {
             msg.title = title;
@@ -645,20 +763,21 @@ public class WeChatShare {
             Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, thumbSize, thumbSize, true);
             msg.thumbData = ShareHelper.decodeBitmap(thumbBmp);
         }
+        if (thumbImage != null) {
+            Bitmap bitmap = Bitmap.createScaledBitmap(thumbImage, thumbSize, thumbSize, true);
+            msg.thumbData = ShareHelper.decodeBitmap(bitmap);
+        }
         if (thumbData != null && thumbData.length != 0) {
             msg.thumbData = thumbData;
         }
-        if (thumbUrl != null && thumbUrl.length() != 0) {
-            msg.thumbData = ShareHelper.decodeUrl(thumbUrl);
-        }
         msg.mediaObject = imgObj;
-        sendReq("image" + System.currentTimeMillis(), msg, scene, "");
+        shareMessage("image" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
      * 分享音乐
      */
-    public void shareMusic() {
+    private void shareMusic() {
         if (musicUrl == null && musicLowBandDataUrl == null && musicDataUrl == null && musicLowBandUrl == null) {
             return;
         }
@@ -690,17 +809,14 @@ public class WeChatShare {
         if (thumbData != null && thumbData.length != 0) {
             msg.thumbData = thumbData;
         }
-        if (thumbUrl != null && thumbUrl.length() != 0) {
-            msg.thumbData = ShareHelper.decodeUrl(thumbUrl);
-        }
-        sendReq("music" + System.currentTimeMillis(), msg, scene, "");
+        shareMessage("music" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
      * 分享视频
      */
-    public void shareVideo() {
-        if (videoUrl == null && thumbData == null && (thumbData == null || thumbData.length == 0)) {
+    private void shareVideo() {
+        if (videoUrl == null && videoLowBandUrl == null) {
             return;
         }
         WXVideoObject video = new WXVideoObject();
@@ -720,12 +836,30 @@ public class WeChatShare {
         if (thumbData != null && thumbData.length != 0) {
             msg.thumbData = thumbData;
         }
-        if (thumbUrl != null && thumbUrl.length() != 0) {
-            msg.thumbData = ShareHelper.decodeUrl(thumbUrl);
-        }
-        sendReq("video" + System.currentTimeMillis(), msg, scene, "");
+        shareMessage("video" + System.currentTimeMillis(), msg, scene, "");
     }
 
+    /**
+     * 分享网页
+     */
+    private void shareWebPage() {
+        if (webpageUrl == null) {
+            return;
+        }
+        WXWebpageObject webPageObject = new WXWebpageObject();
+        webPageObject.webpageUrl = webpageUrl;
+        WXMediaMessage msg = new WXMediaMessage(webPageObject);
+        msg.title = title;
+        msg.description = description;
+        if (thumbImage != null) {
+            Bitmap bitmap = Bitmap.createScaledBitmap(thumbImage, thumbSize, thumbSize, true);
+            msg.thumbData = ShareHelper.decodeBitmap(bitmap);
+        }
+        if (thumbData != null && thumbData.length != 0) {
+            msg.thumbData = thumbData;
+        }
+        shareMessage("webpage" + System.currentTimeMillis(), msg, scene, "");
+    }
 
     /**
      * 调用api接口，发送数据到微信
@@ -735,13 +869,50 @@ public class WeChatShare {
      * @param scene       场景
      * @param openId      授权获取的openId
      */
-    public void sendReq(String transaction, WXMediaMessage message, int scene, String openId) {
-        SendMessageToWX.Req req = new SendMessageToWX.Req();
-        req.transaction = transaction;
-        req.message = message;
-        req.scene = scene;
-//      req.openId = openId;
-        api.sendReq(req);
+    public void shareMessage(final String transaction, final WXMediaMessage message, final int scene, final String openId) {
+        if (thumbUrl != null) {
+            ShareHelper.decodeUrl(thumbUrl, thumbSize, thumbSize, new ShareHelper.OnUrlDecodeBitmapListener() {
+                @Override
+                public void onUrlDecode(Bitmap srcBitmap) {
+                    Bitmap bitmap = Bitmap.createScaledBitmap(srcBitmap, thumbSize, thumbSize, true);
+                    message.thumbData = ShareHelper.decodeBitmap(bitmap);
+                    SendMessageToWX.Req req = new SendMessageToWX.Req();
+                    req.transaction = transaction;
+                    req.message = message;
+                    req.openId = openId;
+                    req.scene = scene;
+                    api.sendReq(req);
+                }
+            });
+        } else {
+            SendMessageToWX.Req req = new SendMessageToWX.Req();
+            req.transaction = transaction;
+            req.message = message;
+            req.openId = openId;
+            req.scene = scene;
+            api.sendReq(req);
+        }
+    }
+
+    /**
+     * 登录接收器
+     */
+    private class WeChatReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(WeChatConstants.ACTION)) {
+                int code = intent.getIntExtra(WeChatConstants.CODE, -200);
+                String msg = intent.getStringExtra(WeChatConstants.MSG);
+                if (listener != null) {
+                    listener.onWeChatShare(code, msg);
+                }
+                if (context != null && receiver != null && (code == WeChatConstants.SUCCEED || code == WeChatConstants.CANCEL || code == WeChatConstants.AUTH_DENIED)) {
+                    context.unregisterReceiver(receiver);
+                }
+            }
+        }
     }
 
 

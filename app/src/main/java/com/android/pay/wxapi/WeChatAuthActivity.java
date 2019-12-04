@@ -73,17 +73,18 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
                     message = "分享取消";
                 }
                 Log.i(TAG, "-[onResp]-> " + message);
-                sendMessage(WeChatConstants.USER_CANCEL, message);
+                sendMessage(WeChatConstants.CANCEL, message);
                 break;
             case BaseResp.ErrCode.ERR_OK:
                 if (type == WeChatConstants.LOGIN) {
                     Log.i(TAG, "-[onResp]-> 用户开始微信授权");
                     String code = ((SendAuth.Resp) resp).code;
-                    sendMessage(WeChatConstants.USER_LOADING, "用户开始微信授权");
+                    sendMessage(WeChatConstants.LOADING, "用户开始微信授权");
                     reqAccessToken(code, WeChatConstants.APP_ID, WeChatConstants.APP_SECRET, WeChatConstants.GRANT_TYPE);
                 }
                 if (type == WeChatConstants.SHARE) {
                     Log.i(TAG, "-[onResp]-> 用户分享结束");
+                    sendMessage(WeChatConstants.SUCCEED, "分享成功");
                 }
                 break;
         }

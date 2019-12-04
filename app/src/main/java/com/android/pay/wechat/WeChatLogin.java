@@ -191,7 +191,7 @@ public class WeChatLogin {
                 if (listener != null) {
                     listener.onWeChatLogin(code, msg, user);
                 }
-                if (context != null && receiver != null && (code == WeChatConstants.SUCCEED || code == WeChatConstants.USER_CANCEL || code == WeChatConstants.AUTH_DENIED)) {
+                if (context != null && receiver != null && (code == WeChatConstants.SUCCEED || code == WeChatConstants.CANCEL || code == WeChatConstants.AUTH_DENIED)) {
                     context.unregisterReceiver(receiver);
                 }
             }
