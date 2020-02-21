@@ -12,13 +12,13 @@ import javax.net.ssl.TrustManager;
  * Created by Relin
  * on 2018-11-01.
  */
-public class PayHttpsSSLSocketFactory {
+public class HttpsSSLSocketFactory {
 
     public static SSLSocketFactory factory() {
         SSLContext sslContext = null;
         try {
             sslContext = SSLContext.getInstance("SSL");
-            TrustManager[] tm = {new PayHttpsX509TrustManager()};
+            TrustManager[] tm = {new HttpsX509TrustManager()};
             sslContext.init(null, tm, new SecureRandom());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

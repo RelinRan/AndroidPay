@@ -9,7 +9,7 @@ import java.util.Map;
  * on 2017/3/13.
  */
 
-public class PayRequestParams {
+public class RequestParams {
 
     /**
      * 文字参数
@@ -23,7 +23,7 @@ public class PayRequestParams {
     private String body;
 
 
-    public PayRequestParams() {
+    public RequestParams() {
 
     }
 

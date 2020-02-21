@@ -21,16 +21,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
  */
 public class WeChatPay {
 
-    //微信支付的广播
-    public static final String ACTION_PAY_FINISH = "ACTION_PAY_FINISH";
-    //0:success,-1:fail,-2:cancel [type:int]
-    public static final String PAY_RESULT = "PAY_RESULT";
-    public static final String PAY_MSG = "PAY_MSG";
-    public static final int PAY_CODE_SUCCEED = 0;
-    public static final int PAY_CODE_FAILED = -1;
-    public static final int PAY_CODE_CANCEL = -2;
 
-    public static String APP_ID;
 
     private IWXAPI iwxapi;
 
@@ -165,11 +156,11 @@ public class WeChatPay {
         this.extData = builder.extData;
         this.listener = builder.listener;
         if (listener != null && receiver == null) {
-            IntentFilter filter = new IntentFilter(WeChatPay.ACTION_PAY_FINISH);
+            IntentFilter filter = new IntentFilter(WeChatConstants.ACTION);
             receiver = new WXPayReceiver();
             context.registerReceiver(receiver, filter);
         }
-        APP_ID = appId;
+        WeChatConstants.APP_ID = appId;
         iwxapi = WXAPIFactory.createWXAPI(context, appId);
         pay();
     }
@@ -195,9 +186,9 @@ public class WeChatPay {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(WeChatPay.ACTION_PAY_FINISH)) {
-                int code = intent.getIntExtra(WeChatPay.PAY_RESULT, -1);
-                String msg = intent.getStringExtra(WeChatPay.PAY_MSG);
+            if (action.equals(WeChatConstants.ACTION)) {
+                int code = intent.getIntExtra(WeChatConstants.CODE, -1);
+                String msg = intent.getStringExtra(WeChatConstants.MSG);
                 if (listener != null) {
                     listener.onWeChatPay(code, msg);
                 }

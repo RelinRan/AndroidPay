@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.android.pay.R;
+import com.android.pay.wechat.WeChatConstants;
 import com.android.pay.wechat.WeChatPay;
 import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
@@ -24,7 +25,7 @@ public class WeChatPayActivity extends Activity implements IWXAPIEventHandler {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.android_aty_wx_pay);
-        api = WXAPIFactory.createWXAPI(this, WeChatPay.APP_ID);
+        api = WXAPIFactory.createWXAPI(this, WeChatConstants.APP_ID);
         api.handleIntent(getIntent(), this);
     }
 
@@ -40,24 +41,29 @@ public class WeChatPayActivity extends Activity implements IWXAPIEventHandler {
         //错误参数 https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_12&index=2
         //errorCode:[0:success,-1:fail,-2:cancel]
         String msg = "";
+        int code = baseResp.errCode;
         if (baseResp.errCode == 0) {
             msg = "支付成功";
-            Log.i(TAG, "[onResp] -> 微信支付成功,展示成功页面。");
+            code = WeChatConstants.SUCCEED;
+            Log.i(TAG, "-[onResp]-> 微信支付成功,展示成功页面。");
         }
         if (baseResp.errCode == -1) {
             msg = "支付失败";
-            Log.i(TAG, "[onResp] -> 微信支付调用失败,可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。");
+            code = WeChatConstants.FAILED;
+            Log.e(TAG, "-[onResp]-> 微信支付调用失败,可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。");
         }
         if (baseResp.errCode == -2) {
             msg = "取消支付";
-            Log.i(TAG, "[onResp] -> 微信支付用户取消,无需处理。发生场景：用户不支付了，点击取消，返回APP。");
+            code = WeChatConstants.CANCEL;
+            Log.i(TAG, "-[onResp]-> 微信支付用户取消,无需处理。发生场景：用户不支付了，点击取消，返回APP。");
         }
         if (baseResp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX) {
-            Intent intent = new Intent(WeChatPay.ACTION_PAY_FINISH);
-            intent.putExtra(WeChatPay.PAY_RESULT, baseResp.errCode);
-            intent.putExtra(WeChatPay.PAY_MSG, msg);
+            Intent intent = new Intent(WeChatConstants.ACTION);
+            intent.putExtra(WeChatConstants.CODE, code);
+            intent.putExtra(WeChatConstants.MSG, msg);
             sendBroadcast(intent);
         }
+        finish();
     }
 
     @Override

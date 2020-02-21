@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by Ice on 2017/8/6.
  */
 
-public class PayHttpResponse implements Serializable {
+public class Response implements Serializable {
 
     //返回的数据
     private String body;
@@ -15,11 +15,11 @@ public class PayHttpResponse implements Serializable {
     //请求的结果code
     private int code;
     //请求参数
-    private PayRequestParams requestParams;
+    private RequestParams requestParams;
     //文件流异常
     private Exception exception;
     //回调接口
-    private OnPayHttpListener httpListener;
+    private OnHttpListener httpListener;
 
     public String body() {
         return body;
@@ -45,19 +45,19 @@ public class PayHttpResponse implements Serializable {
         this.exception = exception;
     }
 
-    public OnPayHttpListener listener() {
+    public OnHttpListener listener() {
         return httpListener;
     }
 
-    public void listener(OnPayHttpListener httpListener) {
+    public void listener(OnHttpListener httpListener) {
         this.httpListener = httpListener;
     }
 
-    public PayRequestParams requestParams() {
+    public RequestParams requestParams() {
         return requestParams;
     }
 
-    public void requestParams(PayRequestParams requestParams) {
+    public void requestParams(RequestParams requestParams) {
         this.requestParams = requestParams;
     }
 

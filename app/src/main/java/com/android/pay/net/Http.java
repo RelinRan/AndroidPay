@@ -3,6 +3,7 @@ package com.android.pay.net;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -20,34 +21,42 @@ import java.util.concurrent.Executors;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class PayHttp {
+public class Http {
 
     /**
      * 编码格式
      */
     private static final String CHARSET = "utf-8";
+
     /**
      * 前缀
      */
     private static final String PREFIX = "--";
+
     /**
      * 换行
      */
     private static final String LINE_FEED = "\r\n";
+
     /**
      * 边界标识 随机生成
      */
     private static final String BOUNDARY = UUID.randomUUID().toString();
 
+    /**
+     * 网络接口Handler
+     */
+    private static Handler handler;
 
-    private static PayHandler httpHandler;
+    /**
+     * 接口线程池
+     */
     private static ExecutorService executorService;
 
     static {
-        httpHandler = new PayHandler();
+        handler = new Handler();
         executorService = Executors.newFixedThreadPool(10);
     }
-
 
     /**
      * 创建服务器连接
@@ -64,8 +73,8 @@ public class PayHttp {
             //https
             if (isHttps) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) httpUrl.openConnection();
-                httpsURLConnection.setSSLSocketFactory(PayHttpsSSLSocketFactory.factory());
-                httpsURLConnection.setHostnameVerifier(new PayHttpsHostnameVerifier());
+                httpsURLConnection.setSSLSocketFactory(HttpsSSLSocketFactory.factory());
+                httpsURLConnection.setHostnameVerifier(new HttpsHostnameVerifier());
                 conn = httpsURLConnection;
             } else {
                 conn = (HttpURLConnection) httpUrl.openConnection();
@@ -105,7 +114,7 @@ public class PayHttp {
      * @param params 请求参数
      * @return
      */
-    protected static String createGetUrl(String url, PayRequestParams params) {
+    protected static String createGetUrl(String url, RequestParams params) {
         StringBuffer requestUrl = new StringBuffer();
         requestUrl.append(url);
         requestUrl.append("?");
@@ -129,7 +138,7 @@ public class PayHttp {
      * @param conn   服务器连接对象
      * @param params 参数
      */
-    protected static void addPostParams(HttpURLConnection conn, PayRequestParams params) {
+    protected static void addPostParams(HttpURLConnection conn, RequestParams params) {
         DataOutputStream dos;
         try {
             dos = new DataOutputStream(conn.getOutputStream());
@@ -163,8 +172,8 @@ public class PayHttp {
     /**
      * 创建Post请求文字参数
      *
-     * @param key
-     * @param value
+     * @param key   名称
+     * @param value 值
      * @return
      */
     protected static StringBuilder buildPostStringParams(String key, String value) {
@@ -185,24 +194,28 @@ public class PayHttp {
     /**
      * 请求
      *
-     * @param requestMethod
-     * @param url
-     * @param params
-     * @param listener
+     * @param requestMethod 请求方法
+     * @param url           请求地址
+     * @param params        参数
+     * @param listener      回调
      */
-    protected static void request(final HttpURLConnection conn, final String requestMethod, final String url, final PayRequestParams params, final OnPayHttpListener listener) {
+    protected static void request(final String requestMethod, final String url, final RequestParams params, final OnHttpListener listener) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
+                HttpURLConnection conn = null;
                 if (requestMethod.equals("GET")) {
-                    createHttpURLConnection(createGetUrl(url, params), requestMethod);
+                    Log.i("RRL", "->GET Url:" + createGetUrl(url, params));
+                    conn = createHttpURLConnection(createGetUrl(url, params), requestMethod);
                 }
                 if (requestMethod.equals("POST")) {
-                    addPostParams(createHttpURLConnection(url, requestMethod), params);
+                    conn = createHttpURLConnection(url, requestMethod);
+                    addPostParams(conn, params);
                 }
                 int code = -1;
                 try {
                     code = conn.getResponseCode();
+                    Log.i("RRL", "->GET request code:" + code);
                     if (code == 200) {
                         InputStream inputStream = conn.getInputStream();
                         //获取返回数据
@@ -212,13 +225,13 @@ public class PayHttp {
                         while ((line = bufferedReader.readLine()) != null) {
                             sb.append(line);
                         }
-                        httpHandler.sendSuccessfulMsg(params, url, code, sb.toString(), listener);
+                        handler.sendSuccessfulMsg(params, url, code, sb.toString(), listener);
                     } else {
-                        httpHandler.sendExceptionMsg(params, url, code, new IOException(PayHandler.HTTP_NO_RESPONSE), listener);
+                        handler.sendExceptionMsg(params, url, code, new IOException(Handler.HTTP_NO_RESPONSE), listener);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    httpHandler.sendExceptionMsg(params, url, code, e, listener);
+                    handler.sendExceptionMsg(params, url, code, e, listener);
                 } finally {
                     conn.disconnect();
                 }
@@ -233,9 +246,9 @@ public class PayHttp {
      * @param params   参数
      * @param listener 监听
      */
-    public static void get(Context context, String url, PayRequestParams params, OnPayHttpListener listener) {
+    public static void get(Context context, String url, RequestParams params, OnHttpListener listener) {
         if (!isAvailable(context)) {
-            PayHttpResponse response = new PayHttpResponse();
+            Response response = new Response();
             response.url(url);
             response.code(-11);
             response.requestParams(params);
@@ -243,7 +256,7 @@ public class PayHttp {
             listener.onHttpFailure(response);
             return;
         }
-        request(createHttpURLConnection(url, "POST"), "GET", url, params, listener);
+        request("GET", url, params, listener);
     }
 
     /**
@@ -253,9 +266,9 @@ public class PayHttp {
      * @param params   参数
      * @param listener 监听
      */
-    public static void post(Context context, String url, PayRequestParams params, OnPayHttpListener listener) {
+    public static void post(Context context, String url, RequestParams params, OnHttpListener listener) {
         if (!isAvailable(context)) {
-            PayHttpResponse response = new PayHttpResponse();
+            Response response = new Response();
             response.url(url);
             response.code(-11);
             response.requestParams(params);
@@ -263,14 +276,14 @@ public class PayHttp {
             listener.onHttpFailure(response);
             return;
         }
-        request(createHttpURLConnection(url, "POST"), "POST", url, params, listener);
+        request("POST", url, params, listener);
     }
 
 
     /**
      * 判断网络是否可用 [需要如下权限]
      *
-     * @param context
+     * @param context 上下文
      * @return
      */
     public static boolean isAvailable(Context context) {

@@ -2,7 +2,7 @@ package com.android.pay.wechat;
 
 import java.io.Serializable;
 
-public class WeChatUserInfo implements Serializable {
+public class WeChatUser implements Serializable {
 
     /**
      * 国家，如中国为 CN
@@ -32,7 +32,7 @@ public class WeChatUserInfo implements Serializable {
     /**
      * 普通用户性别，1 为男性，2 为女性
      */
-    private int sex;
+    private String sex;
 
     /**
      * 普通用户昵称
@@ -48,7 +48,6 @@ public class WeChatUserInfo implements Serializable {
      * 用户特权信息，json 数组，如微信沃卡用户为（chinaunicom）
      */
     private String privilege;
-
 
     public void setCountry(String country) {
         this.country = country;
@@ -70,7 +69,7 @@ public class WeChatUserInfo implements Serializable {
         this.openid = openid;
     }
 
-    public void setSex(int sex) {
+    public void setSex(String sex) {
         this.sex = sex;
     }
 
@@ -106,7 +105,7 @@ public class WeChatUserInfo implements Serializable {
         return openid;
     }
 
-    public int getSex() {
+    public String getSex() {
         return sex;
     }
 

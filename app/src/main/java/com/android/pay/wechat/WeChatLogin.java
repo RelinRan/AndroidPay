@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
@@ -26,7 +25,6 @@ public class WeChatLogin {
      * 微信Secret
      */
     public final String appSecret;
-
 
     /**
      * 登录接收器
@@ -186,14 +184,14 @@ public class WeChatLogin {
             if (action.equals(WeChatConstants.ACTION)) {
                 int code = intent.getIntExtra(WeChatConstants.CODE, -200);
                 String msg = intent.getStringExtra(WeChatConstants.MSG);
-                WeChatUserInfo user = null;
+                WeChatUser user = null;
                 if (intent.getSerializableExtra(WeChatConstants.USER_INFO) != null) {
-                    user = (WeChatUserInfo) intent.getSerializableExtra(WeChatConstants.USER_INFO);
+                    user = (WeChatUser) intent.getSerializableExtra(WeChatConstants.USER_INFO);
                 }
                 if (listener != null) {
                     listener.onWeChatLogin(code, msg, user);
                 }
-                if (context != null && receiver != null && (code == WeChatConstants.SUCCEED || code == WeChatConstants.USER_CANCEL || code == WeChatConstants.AUTH_DENIED)) {
+                if (context != null && receiver != null && (code == WeChatConstants.SUCCEED || code == WeChatConstants.CANCEL || code == WeChatConstants.AUTH_DENIED)) {
                     context.unregisterReceiver(receiver);
                 }
             }
