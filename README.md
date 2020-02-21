@@ -206,6 +206,7 @@ builder.listener(new OnWXLoginListener() {
 builder.build();
 ```
 ####  5.支付宝登录
+#####  1.极简版授权
 A.在项目AndroidManifest.xml配置如下（注意：<data android:scheme="xxxxxxxxxx"/>这个需要自己配置，最好是自己应用包名）
 ```
 <activity android:name="com.alipay.sdk.app.AlipayResultActivity" tools:node="merge">
@@ -226,7 +227,36 @@ builder.listener(new OnAliLoginListener() {
     @Override
     public void onAliLogin(int resultCode, String memo, AliUser aliUser) {
         if (resultCode == AliLogin.OK) {
-            //处理你的逻辑，支付宝只有aliUser.getAuthCode()
+            //处理你的逻辑，极简版本只有aliUser.getAuthCode()
+        }
+    }
+});
+builder.build();
+```
+#####  2.完整版授权
+注意：authInfo需要后端提供，为了安全性。如果后端不提供就是调用OrderInfoUtil工具类如下方法获取
+```
+    /**
+     * 构建授权信息
+     *
+     * @param privateKey 私钥（https://doc.open.alipay.com/docs/doc.htm?treeId=291&articleId=106097&docType=1）
+     * @param pid        签约的支付宝账号对应的支付宝唯一用户号，以2088开头的16位纯数字组成
+     * @param app_id     支付宝分配给开发者的应用ID
+     * @param target_id  商户标识该次用户授权请求的ID，该值在商户端应保持唯一
+     * @param rsa2       签名类型是否是RSA2,否：RSA
+     * @return
+     */
+    public static String buildAuthInfo(String privateKey, String pid, String app_id, String target_id, boolean rsa2)
+```
+
+```
+AliLogin.Builder builder = new AliLogin.Builder(this);
+builder.authInfo("xxxxx");
+builder.listener(new OnAliLoginListener() {
+    @Override
+    public void onAliLogin(int resultCode, String memo, AliUser aliUser) {
+        if (resultCode == AliLogin.OK) {
+            //处理你的逻辑，完整版本有aliUser.getUserId()和aliUser.getAliPayOpenId()
         }
     }
 });
