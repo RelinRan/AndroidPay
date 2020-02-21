@@ -2,13 +2,18 @@ package com.android.pay.alipay;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
+import com.alipay.sdk.app.AuthTask;
 import com.alipay.sdk.app.OpenAuthTask;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class AliLogin implements OpenAuthTask.Callback {
+
+    private final int AUTH_V2 = 0x002;
 
     /**
      * 调用成功
@@ -46,10 +51,19 @@ public class AliLogin implements OpenAuthTask.Callback {
     public final String scheme;
 
     /**
+     * 授权信息
+     */
+    private final String authInfo;
+
+    /**
+     * 是否显示loading
+     */
+    private final boolean isShowLoading;
+
+    /**
      * 登录回调监听
      */
     public final OnAliLoginListener listener;
-
 
     /**
      * 登录构造函数
@@ -60,8 +74,11 @@ public class AliLogin implements OpenAuthTask.Callback {
         this.activity = builder.activity;
         this.scheme = builder.scheme;
         this.appId = builder.appId;
+        this.authInfo = builder.authInfo;
+        this.isShowLoading = builder.isShowLoading;
         this.listener = builder.listener;
-        login();
+        auth();
+        authV2(authInfo, isShowLoading);
     }
 
 
@@ -90,6 +107,16 @@ public class AliLogin implements OpenAuthTask.Callback {
          * 支付宝回跳到你的应用时使用的 Intent Scheme。请设置为不和其它应用冲突的值。
          */
         private String scheme;
+
+        /**
+         * 授权信息
+         */
+        private String authInfo;
+
+        /**
+         * 是否显示Loading
+         */
+        private boolean isShowLoading;
 
         /**
          * 登录监听
@@ -146,6 +173,28 @@ public class AliLogin implements OpenAuthTask.Callback {
         }
 
         /**
+         * 设置授权信息(完成版使用)
+         *
+         * @param authInfo
+         * @return
+         */
+        public Builder authInfo(String authInfo) {
+            this.authInfo = authInfo;
+            return this;
+        }
+
+        /**
+         * 是否显示Loading(完成版使用)
+         *
+         * @param isShowLoading
+         * @return
+         */
+        public Builder showLoading(boolean isShowLoading) {
+            this.isShowLoading = isShowLoading;
+            return this;
+        }
+
+        /**
          * 获取登录监听
          *
          * @return
@@ -176,9 +225,9 @@ public class AliLogin implements OpenAuthTask.Callback {
     }
 
     /**
-     * 登录
+     * 授权版本一（极简版 ）
      */
-    private void login() {
+    private void auth() {
         // 传递给支付宝应用的业务参数
         Map<String, String> bizParams = new HashMap<>();
         bizParams.put("url", "https://authweb.alipay.com/auth?auth_type=PURE_OAUTH_SDK&app_id=" + appId + "&scope=auth_user&state=init");
@@ -186,6 +235,59 @@ public class AliLogin implements OpenAuthTask.Callback {
         OpenAuthTask task = new OpenAuthTask(activity);
         task.execute(scheme, OpenAuthTask.BizType.AccountAuth, bizParams, this, true);
     }
+
+    /**
+     * 授权版本二（完整版）
+     */
+    private void authV2(final String authInfo, final boolean isShowLoading) {
+        if (authInfo == null || authInfo.length() == 0) {
+            return;
+        }
+        Runnable authRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // 构造AuthTask 对象
+                AuthTask authTask = new AuthTask(activity);
+                // 获取授权结果。
+                Map<String, String> result = authTask.authV2(authInfo, isShowLoading);
+                Message message = handler.obtainMessage();
+                message.what = AUTH_V2;
+                message.obj = result;
+                handler.sendMessage(message);
+            }
+        };
+        Thread authThread = new Thread(authRunnable);
+        authThread.start();
+    }
+
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == AUTH_V2) {
+                Map<String, String> info = (Map<String, String>) msg.obj;
+                String result = info.get("result");
+                if (result.contains("&")) {
+                    String results[] = result.split("&");
+                    for (int i = 0; i < results.length; i++) {
+                        String item = results[i];
+                        String keyValues[] = item.split("=");
+                        info.put(keyValues[0], keyValues[1]);
+                    }
+                }
+                AliUser user = new AliUser();
+                user.setResultStatus(info.get("resultStatus"));
+                user.setAuthCode(info.get("auth_code"));
+                user.setResultCode(info.get("result_code"));
+                user.setAliPayOpenId(info.get("alipay_open_id"));
+                user.setUserId(info.get("user_id"));
+                if (listener != null) {
+                    listener.onAliLogin(Integer.parseInt(user.getResultCode()), info.get("memo"), user);
+                }
+            }
+        }
+    };
 
     /**
      * 登录结果
@@ -206,5 +308,5 @@ public class AliLogin implements OpenAuthTask.Callback {
             listener.onAliLogin(resultCode, memo, user);
         }
     }
-    
+
 }

@@ -8,6 +8,9 @@ public class AliUser {
     private String appId;
     /**
      * 结果码
+     * 200:业务处理成功;
+     * 1005:账户已冻结，如有疑问，请联系支付宝技术支持
+     * 202:系统异常，请稍后再试或联系支付宝技术支持
      */
     private String resultCode;
     /**
@@ -22,6 +25,19 @@ public class AliUser {
      * 授权码
      */
     private String authCode;
+    /**
+     * 本次操作的状态(完整授权版本会返回)
+     * 仅当resultStatus为“9000”且resultCode为“200”时，代表授权成功。
+     */
+    private String resultStatus;
+    /**
+     * 支付宝ID(完整授权版本会返回)
+     */
+    private String aliPayOpenId;
+    /**
+     * 用户ID(完整授权版本会返回)
+     */
+    private String userId;
 
     public String getAppId() {
         return appId;
@@ -61,5 +77,29 @@ public class AliUser {
 
     public void setAuthCode(String authCode) {
         this.authCode = authCode;
+    }
+
+    public String getResultStatus() {
+        return resultStatus;
+    }
+
+    public void setResultStatus(String resultStatus) {
+        this.resultStatus = resultStatus;
+    }
+
+    public String getAliPayOpenId() {
+        return aliPayOpenId;
+    }
+
+    public void setAliPayOpenId(String aliPayOpenId) {
+        this.aliPayOpenId = aliPayOpenId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
