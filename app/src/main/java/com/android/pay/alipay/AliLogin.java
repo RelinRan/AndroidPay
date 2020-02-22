@@ -228,6 +228,9 @@ public class AliLogin implements OpenAuthTask.Callback {
      * 授权版本一（极简版 ）
      */
     private void auth() {
+        if (appId == null || scheme == null) {
+            return;
+        }
         // 传递给支付宝应用的业务参数
         Map<String, String> bizParams = new HashMap<>();
         bizParams.put("url", "https://authweb.alipay.com/auth?auth_type=PURE_OAUTH_SDK&app_id=" + appId + "&scope=auth_user&state=init");
