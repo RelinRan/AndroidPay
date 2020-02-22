@@ -1,33 +1,27 @@
 # AndroidPay
-
 #### 功能介绍
 支持微信支付、支付宝支付、银联支付;
 支持微信分享;
 支持微信登录;
 支持微信分享;
-
 #### 软件架构
 只要采用Builder模式
-
 #### 使用说明
 ## 方法一  JitPack依赖
-
-##### （1）在项目下的build.gradle配置如下
-
+##### A.在项目下的build.gradle配置如下
 ```
-	allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
+allprojects {
+	repositories {
+	    ...
+	    maven { url 'https://jitpack.io' }
 	}
+}
 ```
-
-##### （2）在项目app文件夹下的build.gradle配置如下
+##### B.在项目app文件夹下的build.gradle配置如下
 ```
 dependencies {
-	        implementation 'com.github.RelinRan:AndroidPay:1.0.7'
-	}
+	 implementation 'com.github.RelinRan:AndroidPay:1.0.7'
+}
 ```
 ## 方法二  ARR依赖
 [AndroidPay.arr](https://github.com/RelinRan/AndroidPay/blob/master/AndroidPay.aar)
@@ -40,7 +34,6 @@ android {
         }
     }
 }
-
 dependencies {
     implementation(name: 'AndroidPay', ext: 'aar')
 }
@@ -48,64 +41,55 @@ dependencies {
 ```
 #### 1. 微信支付
 ##### A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承WeChatPayActivity
-
 ```
-public class WXPayEntryActivity extends WeChatPayActivity {
-
-}
+public class WXPayEntryActivity extends WeChatPayActivity {}
 ```
 ##### B.AndroidManifest.xml配置
-
 ```
-        <activity
-            android:name=".wxapi.WXPayEntryActivity"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/Android.Theme.Light.NoActionBar" />
+<activity
+    android:name=".wxapi.WXPayEntryActivity"
+    android:exported="true"
+    android:launchMode="singleTop"
+    android:screenOrientation="portrait"
+    android:theme="@style/Android.Theme.Light.NoActionBar" />
 ```
-
 ##### C.支付调用
-
 ```
-        WeChatPay.Builder builder = new WeChatPay.Builder(this);
-        builder.appId("xxxx");
-        builder.partnerId("xxx");
-        builder.prepayId("xxx");
-        builder.nonceStr("xxxx");
-        builder.timeStamp("xxxx");
-        builder.packageValue("Sign=WXPay");
-        builder.sign("xxxx");
-        builder.listener(new OnWeChatPayListener() {
+WeChatPay.Builder builder = new WeChatPay.Builder(this);
+builder.appId("xxxx");
+builder.partnerId("xxx");
+builder.prepayId("xxx");
+builder.nonceStr("xxxx");
+builder.timeStamp("xxxx");
+builder.packageValue("Sign=WXPay");
+builder.sign("xxxx");
+builder.listener(new OnWeChatPayListener() {
+    @Override
+    public void onWeChatPay(int code,String msg) {
+        if(code==WeChatConstants.SUCCEED){//支付成功
 
-            @Override
-            public void onWeChatPay(int code,String msg) {
-                if(code==WeChatConstants.SUCCEED){//支付成功
+        }
+        if(code==WeChatConstants.CANCEL){//用户取消
 
-                }
-                if(code==WeChatConstants.CANCEL){//用户取消
+        }
+        if(code==WeChatConstants.FAILED){//支付失败
 
-                }
-                if(code==WeChatConstants.FAILED){//支付失败
-
-                }
-            }
-        });
-        builder.extData(xxxxx);//支付提示文字
-        builder.build();
-
+        }
+     }
+});
+builder.extData(xxxxx);//支付提示文字
+builder.build();
 ```
 
 #### 2. 支付宝支付
-
 ##### A.AndroidManifest.xml配置
-##### 1.AndroidManifest.xml非必要配置（项目本身或者其他arr没有配置org.apache.http.legacy的情况之下需要）：
+##### A-1.AndroidManifest.xml非必要配置（项目本身或者其他arr没有配置org.apache.http.legacy的情况之下需要）：
 ```
 <uses-library
     android:name="org.apache.http.legacy"
     android:required="false" />
 ```
-##### 2.AndroidManifest.xml主要配置
+##### A-2.AndroidManifest.xml主要配置
 ```
 <activity
     android:name="com.alipay.sdk.app.H5PayActivity"
@@ -232,8 +216,8 @@ builder.build();
 2. AliLogin.Duplex = 5000 (3s内快速发起了多次支付 / 授权调用。稍后重试即可。)
 3. AliLogin.NOT_INSTALLED = 4001（用户未安装支付宝 App。）
 4. AliLogin.SYS_ERR = 4000（其它错误，如参数传递错误。）
-4. AliLogin.CANCEL = 6001（用户取消）
-4. AliLogin.NET_ERROR = 6002（网络连接出错）
+5. AliLogin.CANCEL = 6001（用户取消）
+6. AliLogin.NET_ERROR = 6002（网络连接出错）
 #####  1.极简版授权
 ##### A.在项目AndroidManifest.xml配置如下（注意：<data android:scheme="xxxxxxxxxx"/>这个需要自己配置，最好是自己应用包名）
 ```
@@ -262,7 +246,7 @@ builder.listener(new OnAliLoginListener() {
 builder.build();
 ```
 #####  2.完整版授权
-##### 1.注意：authInfo需要后端提供，为了安全性。如果后端不提供就是调用OrderInfoUtil工具类如下方法获取
+##### A.注意：authInfo需要后端提供，为了安全性。如果后端不提供就是调用OrderInfoUtil工具类如下方法获取
 ```
 /**
 * 构建授权信息
@@ -276,7 +260,7 @@ builder.build();
 */
 public static String buildAuthInfo(String privateKey, String pid, String app_id, String target_id, boolean rsa2)
 ```
-##### 2.授权AndroidManifest.xml配置
+##### B.授权AndroidManifest.xml配置
 ```
 <activity
     android:name="com.alipay.sdk.app.H5AuthActivity"
@@ -291,7 +275,7 @@ public static String buildAuthInfo(String privateKey, String pid, String app_id,
     android:windowSoftInputMode="adjustResize|stateHidden" >
 </activity>
 ```
-##### 2.授权调用代码
+##### C.授权调用代码
 ```
 AliLogin.Builder builder = new AliLogin.Builder(this);
 builder.authInfo("xxxxx");
