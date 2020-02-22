@@ -210,7 +210,7 @@ builder.listener(new OnWXLoginListener() {
 });
 builder.build();
 ```
-####  5.支付宝登录
+####  5.支付宝登录（[官方文档](https://docs.open.alipay.com/218/)）
 ##### 授权登录回调onAliLogin（int code, String memo, AliUser aliUser）回调返回code值如下：
 1. AliLogin.OK = 9000 (调用成功)
 2. AliLogin.Duplex = 5000 (3s内快速发起了多次支付 / 授权调用。稍后重试即可。)
@@ -218,7 +218,7 @@ builder.build();
 4. AliLogin.SYS_ERR = 4000（其它错误，如参数传递错误。）
 5. AliLogin.CANCEL = 6001（用户取消）
 6. AliLogin.NET_ERROR = 6002（网络连接出错）
-#####  1.极简版授权
+#####  1.极简版授权([官方文档](https://docs.open.alipay.com/218/sxc60m/))
 ##### A.在项目AndroidManifest.xml配置如下（注意：<data android:scheme="xxxxxxxxxx"/>这个需要自己配置，最好是自己应用包名）
 ```
 <activity android:name="com.alipay.sdk.app.AlipayResultActivity" tools:node="merge">
@@ -245,7 +245,7 @@ builder.listener(new OnAliLoginListener() {
 });
 builder.build();
 ```
-#####  2.完整版授权
+#####  2.完整版授权（[官方文档](https://docs.open.alipay.com/218/105325/)）
 ##### A.注意：authInfo需要后端提供，为了安全性。如果后端不提供就是调用OrderInfoUtil工具类如下方法获取
 ```
 /**
@@ -296,7 +296,7 @@ public class WXEntryActivity extends WeChatAuthActivity {}
 ```
 ##### B.微信分享代码
 因为根据官方文档集成，其中参数名字也跟官方文档一致，目前只是加了一个thumUrl和imageUrl不跟官方文档一致，为了方便缩略图和图片分享使用网络图片;
-其他的参数参考官方文档：https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Share_and_Favorites/Android.html
+其他的参数参考[官方文档](https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Share_and_Favorites/Android.html)
 
 ###### B-1.图片分享代码
 ```
