@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.alipay.sdk.app.AuthTask;
 import com.alipay.sdk.app.OpenAuthTask;
@@ -34,6 +35,16 @@ public class AliLogin implements OpenAuthTask.Callback {
      * 其它错误，如参数传递错误
      */
     public static final int SYS_ERR = OpenAuthTask.SYS_ERR;
+
+    /**
+     * 用户取消
+     */
+    public static final int CANCEL = 6001;
+
+    /**
+     * 网络连接出错
+     */
+    public static final int NET_ERROR = 6002;
 
     /**
      * 登录页面
@@ -243,9 +254,10 @@ public class AliLogin implements OpenAuthTask.Callback {
      * 授权版本二（完整版）
      */
     private void authV2(final String authInfo, final boolean isShowLoading) {
-        if (authInfo == null || authInfo.length() == 0) {
+        if (authInfo == null) {
             return;
         }
+        Log.i(this.getClass().getSimpleName(), "->authV2 authInfo:" + authInfo);
         Runnable authRunnable = new Runnable() {
             @Override
             public void run() {
@@ -253,6 +265,7 @@ public class AliLogin implements OpenAuthTask.Callback {
                 AuthTask authTask = new AuthTask(activity);
                 // 获取授权结果。
                 Map<String, String> result = authTask.authV2(authInfo, isShowLoading);
+                Log.i(this.getClass().getSimpleName(), "->authV2 result:" + result.toString());
                 Message message = handler.obtainMessage();
                 message.what = AUTH_V2;
                 message.obj = result;
@@ -286,7 +299,8 @@ public class AliLogin implements OpenAuthTask.Callback {
                 user.setAliPayOpenId(info.get("alipay_open_id"));
                 user.setUserId(info.get("user_id"));
                 if (listener != null) {
-                    listener.onAliLogin(Integer.parseInt(user.getResultCode()), info.get("memo"), user);
+                    int code = user.getResultCode().equals("200") && user.getResultStatus().equals(OK + "") ? OK : Integer.parseInt(user.getResultCode());
+                    listener.onAliLogin(code, info.get("memo"), user);
                 }
             }
         }
