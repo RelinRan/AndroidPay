@@ -44,7 +44,7 @@ public class AliUser {
     }
 
     public void setAppId(String appId) {
-        this.appId = appId;
+        this.appId = appId==null?"":appId;
     }
 
     public String getResultCode() {
@@ -52,7 +52,7 @@ public class AliUser {
     }
 
     public void setResultCode(String resultCode) {
-        this.resultCode = resultCode;
+        this.resultCode = resultCode==null?"0":resultCode;
     }
 
     public String getScope() {
@@ -60,7 +60,7 @@ public class AliUser {
     }
 
     public void setScope(String scope) {
-        this.scope = scope;
+        this.scope = scope==null?"":scope;
     }
 
     public String getState() {
@@ -68,15 +68,15 @@ public class AliUser {
     }
 
     public void setState(String state) {
-        this.state = state;
+        this.state = state==null?"":state;
     }
 
     public String getAuthCode() {
-        return authCode;
+        return authCode ;
     }
 
     public void setAuthCode(String authCode) {
-        this.authCode = authCode;
+        this.authCode = authCode==null?"":authCode;
     }
 
     public String getResultStatus() {
@@ -84,7 +84,7 @@ public class AliUser {
     }
 
     public void setResultStatus(String resultStatus) {
-        this.resultStatus = resultStatus;
+        this.resultStatus = resultStatus==null?"0":resultStatus;
     }
 
     public String getAliPayOpenId() {
@@ -92,7 +92,7 @@ public class AliUser {
     }
 
     public void setAliPayOpenId(String aliPayOpenId) {
-        this.aliPayOpenId = aliPayOpenId;
+        this.aliPayOpenId = aliPayOpenId==null?"":aliPayOpenId;
     }
 
     public String getUserId() {
@@ -100,6 +100,20 @@ public class AliUser {
     }
 
     public void setUserId(String userId) {
-        this.userId = userId;
+        this.userId = userId==null?"":userId;
+    }
+
+    @Override
+    public String toString() {
+        return "AliUser{" +
+                "appId='" + appId + '\'' +
+                ", resultCode='" + resultCode + '\'' +
+                ", scope='" + scope + '\'' +
+                ", state='" + state + '\'' +
+                ", authCode='" + authCode + '\'' +
+                ", resultStatus='" + resultStatus + '\'' +
+                ", aliPayOpenId='" + aliPayOpenId + '\'' +
+                ", userId='" + userId + '\'' +
+                '}';
     }
 }

@@ -284,7 +284,6 @@ public class AliLogin implements OpenAuthTask.Callback {
             if (msg.what == AUTH_V2) {
                 Map<String, String> info = (Map<String, String>) msg.obj;
                 String result = info.get("result");
-                Log.i(this.getClass().getSimpleName(), "-> aliPay auth v2 result:" + result);
                 AliUser user = new AliUser();
                 if (result.contains("&")) {
                     String results[] = result.split("&");
@@ -294,11 +293,12 @@ public class AliLogin implements OpenAuthTask.Callback {
                         info.put(keyValues[0], keyValues[1]);
                     }
                 }
-                user.setResultStatus(info.get("resultStatus") == null ? "0" : info.get("resultStatus"));
-                user.setAuthCode(info.get("auth_code") == null ? "0" : info.get("auth_code"));
-                user.setResultCode(info.get("result_code") == null ? "0" : info.get("result_code"));
-                user.setAliPayOpenId(info.get("alipay_open_id") == null ? "" : info.get("alipay_open_id"));
-                user.setUserId(info.get("user_id") == null ? "" : info.get("user_id"));
+                user.setResultStatus(info.get("resultStatus"));
+                user.setAuthCode(info.get("auth_code"));
+                user.setResultCode(info.get("result_code"));
+                user.setAliPayOpenId(info.get("alipay_open_id"));
+                user.setUserId(info.get("user_id"));
+                Log.i(this.getClass().getSimpleName(), "-> auth v2 result:" + user.toString());
                 if (listener != null) {
                     int code = user.getResultCode().equals("200") && user.getResultStatus().equals(OK + "") ? OK : Integer.parseInt(user.getResultCode());
                     listener.onAliLogin(code, info.get("memo"), user);
@@ -323,6 +323,7 @@ public class AliLogin implements OpenAuthTask.Callback {
             user.setScope(bundle.getString("scope"));
             user.setState(bundle.getString("state"));
             user.setAuthCode(bundle.getString("auth_code"));
+            Log.i(this.getClass().getSimpleName(), "-> auth v1 result:" + user.toString());
             listener.onAliLogin(resultCode, memo, user);
         }
     }
