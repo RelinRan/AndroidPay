@@ -12,7 +12,7 @@ public class AliUser {
      * 1005:账户已冻结，如有疑问，请联系支付宝技术支持
      * 202:系统异常，请稍后再试或联系支付宝技术支持
      */
-    private String resultCode;
+    private String resultCode = "0";
     /**
      * 极简版 SDK 固定参数，传其他参数无效。auth_base 为用户基础授权，仅用于静默获取用户支付宝 UID；auth_user 获取用户信息，网站支付宝登录。
      */

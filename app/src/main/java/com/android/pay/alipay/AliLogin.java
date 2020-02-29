@@ -283,7 +283,9 @@ public class AliLogin implements OpenAuthTask.Callback {
             super.handleMessage(msg);
             if (msg.what == AUTH_V2) {
                 Map<String, String> info = (Map<String, String>) msg.obj;
+                Log.i(this.getClass().getSimpleName(), "-> aliPay auth v2 info:" + info.toString());
                 String result = info.get("result");
+                AliUser user = new AliUser();
                 if (result.contains("&")) {
                     String results[] = result.split("&");
                     for (int i = 0; i < results.length; i++) {
@@ -292,12 +294,11 @@ public class AliLogin implements OpenAuthTask.Callback {
                         info.put(keyValues[0], keyValues[1]);
                     }
                 }
-                AliUser user = new AliUser();
-                user.setResultStatus(info.get("resultStatus"));
-                user.setAuthCode(info.get("auth_code"));
-                user.setResultCode(info.get("result_code"));
-                user.setAliPayOpenId(info.get("alipay_open_id"));
-                user.setUserId(info.get("user_id"));
+                user.setResultStatus(info.get("resultStatus") == null ? "0" : info.get("resultStatus"));
+                user.setAuthCode(info.get("auth_code") == null ? "0" : info.get("auth_code"));
+                user.setResultCode(info.get("result_code") == null ? "0" : info.get("result_code"));
+                user.setAliPayOpenId(info.get("alipay_open_id") == null ? "" : info.get("alipay_open_id"));
+                user.setUserId(info.get("user_id") == null ? "" : info.get("user_id"));
                 if (listener != null) {
                     int code = user.getResultCode().equals("200") && user.getResultStatus().equals(OK + "") ? OK : Integer.parseInt(user.getResultCode());
                     listener.onAliLogin(code, info.get("memo"), user);
