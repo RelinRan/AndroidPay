@@ -283,8 +283,8 @@ public class AliLogin implements OpenAuthTask.Callback {
             super.handleMessage(msg);
             if (msg.what == AUTH_V2) {
                 Map<String, String> info = (Map<String, String>) msg.obj;
-                Log.i(this.getClass().getSimpleName(), "-> aliPay auth v2 info:" + info.toString());
                 String result = info.get("result");
+                Log.i(this.getClass().getSimpleName(), "-> aliPay auth v2 result:" + result);
                 AliUser user = new AliUser();
                 if (result.contains("&")) {
                     String results[] = result.split("&");
