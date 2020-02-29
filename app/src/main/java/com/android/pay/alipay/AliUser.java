@@ -16,28 +16,28 @@ public class AliUser {
     /**
      * 极简版 SDK 固定参数，传其他参数无效。auth_base 为用户基础授权，仅用于静默获取用户支付宝 UID；auth_user 获取用户信息，网站支付宝登录。
      */
-    private String scope;
+    private String scope = "";
     /**
      * OAuth 2 协议参数，可设置为随机字符串的 base64 编码（100位以内）
      */
-    private String state;
+    private String state = "";
     /**
      * 授权码
      */
-    private String authCode;
+    private String authCode = "";
     /**
      * 本次操作的状态(完整授权版本会返回)
      * 仅当resultStatus为“9000”且resultCode为“200”时，代表授权成功。
      */
-    private String resultStatus;
+    private String resultStatus = "";
     /**
      * 支付宝ID(完整授权版本会返回)
      */
-    private String aliPayOpenId;
+    private String aliPayOpenId = "";
     /**
      * 用户ID(完整授权版本会返回)
      */
-    private String userId;
+    private String userId = "";
 
     public String getAppId() {
         return appId;
