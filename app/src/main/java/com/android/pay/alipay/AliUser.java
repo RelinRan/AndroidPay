@@ -5,7 +5,7 @@ public class AliUser {
     /**
      * 支付宝分配给开发者的应用 ID
      */
-    private String appId;
+    private String appId = "";
     /**
      * 结果码
      * 200:业务处理成功;
