@@ -20,7 +20,7 @@ allprojects {
 ##### B.在项目app文件夹下的build.gradle配置如下
 ```
 dependencies {
-	 implementation 'com.github.RelinRan:AndroidPay:1.0.7'
+	 implementation 'com.github.RelinRan:AndroidPay:1.0.8'
 }
 ```
 ## 方法二  ARR依赖
@@ -83,35 +83,11 @@ builder.build();
 
 #### 2. 支付宝支付
 ##### A.AndroidManifest.xml配置
-##### A-1.AndroidManifest.xml非必要配置（项目本身或者其他arr没有配置org.apache.http.legacy的情况之下需要）：
+##### AndroidManifest.xml非必要配置（项目本身或者其他arr没有配置org.apache.http.legacy的情况之下需要）：
 ```
 <uses-library
     android:name="org.apache.http.legacy"
     android:required="false" />
-```
-##### A-2.AndroidManifest.xml主要配置
-```
-<activity
-    android:name="com.alipay.sdk.app.H5PayActivity"
-    android:configChanges="orientation|keyboardHidden|navigation|screenSize"
-    android:exported="false" >
-</activity>
-<activity
-    android:name="com.alipay.sdk.app.PayResultActivity"
-    android:configChanges="orientation|keyboardHidden|navigation|screenSize"
-    android:exported="true"
-    android:launchMode="singleInstance"
-    android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-    <intent-filter>
-<category android:name="android.intent.category.DEFAULT" />
-    </intent-filter>
-</activity>
-<activity
-    android:name="com.alipay.sdk.app.AlipayResultActivity"
-    android:exported="true"
-    android:launchMode="singleTask"
-    android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-</activity>
 ```
 
 ##### B.支付调用

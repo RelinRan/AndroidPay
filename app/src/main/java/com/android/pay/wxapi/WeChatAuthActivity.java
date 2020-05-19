@@ -58,7 +58,7 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
         type = resp.getType();
         Bundle bundle = new Bundle();
         resp.toBundle(bundle);
-        Log.i(TAG, "-[onResp]->type:" + type + ",code:" + resp.errCode + ",openId:" + resp.openId+",bundle:"+bundle.toString());
+        Log.i(TAG, "-[onResp]->type:" + type + ",code:" + resp.errCode + ",openId:" + resp.openId + ",bundle:" + bundle.toString());
         switch (resp.errCode) {
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
                 Log.i(TAG, "-[onResp]-> 拒绝授权微信登录");
@@ -123,11 +123,29 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
         Http.get(this, WeChatConstants.URL_USER_INFO, params, this);
     }
 
+    /**
+     * 刷新或续期 access_token 使用
+     *
+     * @param openid        应用唯一标识
+     * @param refresh_token 填写通过 access_token 获取到的 refresh_token 参数
+     */
+    private void reqRefreshToken(String openid, String refresh_token) {
+        RequestParams params = new RequestParams();
+        params.add("openid", openid);
+        params.add("grant_type", "refresh_token");
+        params.add("refresh_token", refresh_token);
+        Http.get(this, WeChatConstants.URL_REFRESH_TOKEN, params, this);
+    }
+
     @Override
     public void onHttpSucceed(Response result) {
         if (result.url().contains(WeChatConstants.URL_ACCESS_TOKEN)) {
             accessToken = Json.parseJSONObject(WeChatAccessToken.class, result.body());
-            reqUserInfo(accessToken.getAccess_token(), accessToken.getOpenid(), "zh-CN");
+            reqRefreshToken(WeChatConstants.APP_ID, accessToken.getRefresh_token());
+        }
+        if (result.url().contains(WeChatConstants.URL_REFRESH_TOKEN)) {
+            accessToken = Json.parseJSONObject(WeChatAccessToken.class, result.body());
+            reqUserInfo(accessToken.getRefresh_token(), accessToken.getOpenid(), "zh-CN");
         }
         if (result.url().contains(WeChatConstants.URL_USER_INFO)) {
             userInfo = Json.parseJSONObject(WeChatUser.class, result.body());

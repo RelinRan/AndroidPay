@@ -28,6 +28,11 @@ public class WeChatConstants {
     public static final String URL_USER_INFO = "https://api.weixin.qq.com/sns/userinfo";
 
     /**
+     * 微信刷新Token
+     */
+    public static final String URL_REFRESH_TOKEN = "https://api.weixin.qq.com/sns/oauth2/refresh_token";
+
+    /**
      * 微信授权类型
      */
     public static final String GRANT_TYPE = "authorization_code";
