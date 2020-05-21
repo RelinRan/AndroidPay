@@ -20,7 +20,7 @@ allprojects {
 ##### B.在项目app文件夹下的build.gradle配置如下
 ```
 dependencies {
-	 implementation 'com.github.RelinRan:AndroidPay:1.0.8'
+	 implementation 'com.github.RelinRan:AndroidPay:1.0.9'
 }
 ```
 ## 方法二  ARR依赖
