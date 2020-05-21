@@ -20,7 +20,7 @@ allprojects {
 ##### B.在项目app文件夹下的build.gradle配置如下
 ```
 dependencies {
-	 implementation 'com.github.RelinRan:AndroidPay:1.0.10'
+	 implementation 'com.github.RelinRan:AndroidPay:1.0.11'
 }
 ```
 ## 方法二  ARR依赖
@@ -277,12 +277,9 @@ public class WXEntryActivity extends WeChatAuthActivity {}
 ###### B-1.图片分享代码
 ```
 WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.type(WeChatShare.TYPE_IMAGE);
 builder.appId(Constants.WE_CHAT_APP_ID);
 builder.scene(WeChatShare.SCENE_SESSION);
-builder.title("标题");
-builder.description("描述信息");
-//缩略图设置
-builder.thumbImage(bitmap);//或 builder.thumbUrl("http://xxxxxx"); 或builder.thumbData(byte[]);
 builder.imagePath("本地图片地址");//或者builder.imageUrl("http://xxxxxx");
 builder.listener(new OnWeChatShareListener() {
     @Override
@@ -296,11 +293,11 @@ builder.build();
 ###### B-2.视频分享代码
 ```
 WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.type(WeChatShare.TYPE_VIDEO);
 builder.appId(Constants.WE_CHAT_APP_ID);
 builder.scene(WeChatShare.SCENE_SESSION);
 builder.title("标题");
 builder.description("描述信息");
-//缩略图设置
 builder.thumbImage(bitmap);//或 builder.thumbUrl("http://xxxxxx"); 或builder.thumbData(byte[]);
 builder.videoUrl("视频网络地址");
 builder.listener(new OnWeChatShareListener() {
@@ -321,6 +318,7 @@ builder.build();
 ###### B-3.网页分享代码
 ```
 WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.type(WeChatShare.TYPE_WEB);
 builder.appId(Constants.WE_CHAT_APP_ID);
 builder.scene(WeChatShare.SCENE_SESSION);
 builder.title("标题");
@@ -345,6 +343,7 @@ builder.build();
 ###### B-4.音乐分享代码
 ```
 WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.type(WeChatShare.TYPE_MUSIC);
 builder.appId(Constants.WE_CHAT_APP_ID);
 builder.scene(WeChatShare.SCENE_SESSION);
 builder.title("标题");

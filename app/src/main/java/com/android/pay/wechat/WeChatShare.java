@@ -770,7 +770,7 @@ public class WeChatShare {
                     }
                 });
             } else {
-                shareImage(null);
+                shareImage(imageData);
             }
         }
         if (type == TYPE_MUSIC) {
