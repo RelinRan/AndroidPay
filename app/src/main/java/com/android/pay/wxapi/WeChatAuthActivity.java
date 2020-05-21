@@ -126,12 +126,12 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
     /**
      * 刷新或续期 access_token 使用
      *
-     * @param openid        应用唯一标识
+     * @param appid         应用唯一标识
      * @param refresh_token 填写通过 access_token 获取到的 refresh_token 参数
      */
-    private void reqRefreshToken(String openid, String refresh_token) {
+    private void reqRefreshToken(String appid, String refresh_token) {
         RequestParams params = new RequestParams();
-        params.add("openid", openid);
+        params.add("appid", appid);
         params.add("grant_type", "refresh_token");
         params.add("refresh_token", refresh_token);
         Http.get(this, WeChatConstants.URL_REFRESH_TOKEN, params, this);
@@ -145,7 +145,7 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
         }
         if (result.url().contains(WeChatConstants.URL_REFRESH_TOKEN)) {
             accessToken = Json.parseJSONObject(WeChatAccessToken.class, result.body());
-            reqUserInfo(accessToken.getRefresh_token(), accessToken.getOpenid(), "zh-CN");
+            reqUserInfo(accessToken.getAccess_token(), accessToken.getOpenid(), "zh-CN");
         }
         if (result.url().contains(WeChatConstants.URL_USER_INFO)) {
             userInfo = Json.parseJSONObject(WeChatUser.class, result.body());
