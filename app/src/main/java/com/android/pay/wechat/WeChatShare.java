@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 
+import com.android.pay.R;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXImageObject;
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
@@ -38,6 +39,26 @@ public class WeChatShare {
      */
     public static final int SCENE_FAVORITE = SendMessageToWX.Req.WXSceneFavorite;
 
+    /**
+     * 纯文本
+     */
+    public static final int TYPE_TEXT = 0x010;
+    /**
+     * 纯图片
+     */
+    public static final int TYPE_IMAGE = 0x020;
+    /**
+     * 音乐
+     */
+    public static final int TYPE_MUSIC = 0x030;
+    /**
+     * 视频
+     */
+    public static final int TYPE_VIDEO = 0x040;
+    /**
+     * 网页
+     */
+    public static final int TYPE_WEB = 0x050;
 
     /**
      * 微信api对象
@@ -151,6 +172,11 @@ public class WeChatShare {
      */
     public final OnWeChatShareListener listener;
 
+    /**
+     * 分享类型
+     */
+    public final int type;
+
     private WeChatReceiver receiver;
 
     /**
@@ -180,36 +206,9 @@ public class WeChatShare {
         this.videoLowBandUrl = builder.videoLowBandUrl;
         this.webpageUrl = builder.webpageUrl;
         this.listener = builder.listener;
+        this.type = builder.type;
         share();
     }
-
-    /**
-     * 分享
-     */
-    private void share() {
-        if (listener != null && context != null && receiver == null) {
-            receiver = new WeChatReceiver();
-            IntentFilter filter = new IntentFilter(WeChatConstants.ACTION);
-            context.registerReceiver(receiver, filter);
-        }
-        api = WXAPIFactory.createWXAPI(context, WeChatConstants.APP_ID, true);
-        api.registerApp(appId);
-        shareText();
-        if (imageUrl != null) {
-            ShareHelper.decodeUrl(imageUrl, new ShareHelper.OnUrlDecodeByteListener() {
-                @Override
-                public void onUrlDecode(byte[] data) {
-                    shareImage(data);
-                }
-            });
-        } else {
-            shareImage(null);
-        }
-        shareMusic();
-        shareWebPage();
-        shareVideo();
-    }
-
 
     /**
      * 构建者
@@ -320,6 +319,11 @@ public class WeChatShare {
          * 分享回调
          */
         private OnWeChatShareListener listener;
+
+        /**
+         * 分享类型(默认Web)
+         */
+        private int type = TYPE_WEB;
 
         /**
          * 分享构建者
@@ -677,6 +681,7 @@ public class WeChatShare {
 
         /**
          * html 链接,限制长度不超过 10KB
+         *
          * @return
          */
         public String webageUrl() {
@@ -685,6 +690,7 @@ public class WeChatShare {
 
         /**
          * html 链接,限制长度不超过10KB
+         *
          * @param webpageUrl
          */
         public void webpageUrl(String webpageUrl) {
@@ -710,6 +716,26 @@ public class WeChatShare {
         }
 
         /**
+         * 分享类型
+         *
+         * @return
+         */
+        public int type() {
+            return type;
+        }
+
+        /**
+         * 分享类型
+         *
+         * @param type
+         * @return
+         */
+        public Builder type(int type) {
+            this.type = type;
+            return this;
+        }
+
+        /**
          * 构建分享对象进行分享
          *
          * @return
@@ -718,6 +744,44 @@ public class WeChatShare {
             return new WeChatShare(this);
         }
 
+    }
+
+    /**
+     * 分享
+     */
+    private void share() {
+        if (listener != null && context != null && receiver == null) {
+            receiver = new WeChatReceiver();
+            IntentFilter filter = new IntentFilter(WeChatConstants.ACTION);
+            context.registerReceiver(receiver, filter);
+        }
+        api = WXAPIFactory.createWXAPI(context, WeChatConstants.APP_ID, true);
+        api.registerApp(appId);
+        //分享类型
+        if (type == TYPE_TEXT) {
+            shareText();
+        }
+        if (type == TYPE_IMAGE) {
+            if (imageUrl != null) {
+                ShareHelper.decodeUrl(imageUrl, new ShareHelper.OnUrlDecodeByteListener() {
+                    @Override
+                    public void onUrlDecode(byte[] data) {
+                        shareImage(data);
+                    }
+                });
+            } else {
+                shareImage(null);
+            }
+        }
+        if (type == TYPE_MUSIC) {
+            shareMusic();
+        }
+        if (type == TYPE_VIDEO) {
+            shareVideo();
+        }
+        if (type == TYPE_WEB) {
+            shareWebPage();
+        }
     }
 
     /**
@@ -731,9 +795,7 @@ public class WeChatShare {
         textObj.text = text;
         WXMediaMessage msg = new WXMediaMessage();
         msg.mediaObject = textObj;
-        if (!TextUtils.isEmpty(text)) {
-            msg.description = text;
-        }
+        msg.description = text;
         shareMessage("text" + System.currentTimeMillis(), msg, scene, "");
     }
 
@@ -741,17 +803,19 @@ public class WeChatShare {
      * 分享本地图片
      */
     private void shareImage(byte[] imageData) {
-        if (imagePath == null) {
+        //图片的二进制数据 和 图片的本地路径都为空
+        if (imageData == null && imagePath == null) {
             return;
         }
         WXImageObject imgObj = new WXImageObject();
+        if (imageData != null) {
+            imgObj.imageData = imageData;
+        }
         if (imagePath != null) {
             imgObj.imagePath = imagePath;
         }
-        if (imageData != null && imageData.length != 0) {
-            imgObj.imageData = imageData;
-        }
         WXMediaMessage msg = new WXMediaMessage();
+        msg.mediaObject = imgObj;
         if (!TextUtils.isEmpty(title)) {
             msg.title = title;
         }
@@ -770,7 +834,6 @@ public class WeChatShare {
         if (thumbData != null && thumbData.length != 0) {
             msg.thumbData = thumbData;
         }
-        msg.mediaObject = imgObj;
         shareMessage("image" + System.currentTimeMillis(), msg, scene, "");
     }
 
