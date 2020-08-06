@@ -750,6 +750,10 @@ public class WeChatShare {
      * 分享
      */
     private void share() {
+        if (receiver!=null){
+            context.unregisterReceiver(receiver);
+            receiver = null;
+        }
         if (listener != null && context != null && receiver == null) {
             receiver = new WeChatReceiver();
             IntentFilter filter = new IntentFilter(WeChatConstants.ACTION);
@@ -973,6 +977,7 @@ public class WeChatShare {
                 }
                 if (context != null && receiver != null && (code == WeChatConstants.SUCCEED || code == WeChatConstants.CANCEL || code == WeChatConstants.AUTH_DENIED)) {
                     context.unregisterReceiver(receiver);
+                    receiver = null;
                 }
             }
         }
