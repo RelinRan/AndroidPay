@@ -1,5 +1,6 @@
 package com.android.pay.wechat;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -750,6 +751,12 @@ public class WeChatShare {
      * 分享
      */
     private void share() {
+        if (context instanceof Activity){
+            Activity activity = (Activity) context;
+            if (activity.isFinishing()){
+                return;
+            }
+        }
         if (receiver!=null){
             context.unregisterReceiver(receiver);
             receiver = null;

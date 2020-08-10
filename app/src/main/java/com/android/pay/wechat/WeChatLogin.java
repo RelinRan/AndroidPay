@@ -1,5 +1,6 @@
 package com.android.pay.wechat;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -48,6 +49,12 @@ public class WeChatLogin {
         this.listener = builder.listener;
         WeChatConstants.APP_ID = appId;
         WeChatConstants.APP_SECRET = appSecret;
+        if (context instanceof Activity){
+            Activity activity = (Activity) context;
+            if (activity.isFinishing()){
+                return;
+            }
+        }
         if (listener != null && context != null && receiver == null) {
             receiver = new WeChatReceiver();
             IntentFilter filter = new IntentFilter(WeChatConstants.ACTION);
