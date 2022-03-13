@@ -65,7 +65,7 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
         switch (resp.errCode) {
             case BaseResp.ErrCode.ERR_BAN:
                 Log.i(TAG, "-[onResp]-> 运行参数与平台配置参数不一致");
-                sendMessage(WeChatConstants.ERR_BAN, "运行参数与平台配置参数不一致");
+                sendMessage(WeChatConstants.FAILED, "参数与平台配置参数不一致");
                 break;
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
                 Log.i(TAG, "-[onResp]-> 拒绝授权微信登录");
@@ -152,7 +152,7 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
                 reqRefreshToken(WeChatConstants.APP_ID, accessToken.getRefresh_token());
             } else {
                 Log.i(TAG, "-[ACCESS_TOKEN]-> errorCode:" + accessToken.getErrcode()+",errorMsg:"+accessToken.getErrmsg());
-                sendMessage(accessToken.getErrcode(),accessToken.getErrmsg());
+                sendMessage(WeChatConstants.FAILED,accessToken.getErrmsg());
             }
         }
         if (result.url().contains(WeChatConstants.URL_REFRESH_TOKEN)) {
@@ -161,7 +161,7 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
                 reqUserInfo(accessToken.getAccess_token(), accessToken.getOpenid(), "zh-CN");
             } else {
                 Log.i(TAG, "-[REFRESH_TOKEN]-> errorCode:" + accessToken.getErrcode()+",errorMsg:"+accessToken.getErrmsg());
-                sendMessage(accessToken.getErrcode(),accessToken.getErrmsg());
+                sendMessage(WeChatConstants.FAILED,accessToken.getErrmsg());
             }
         }
         if (result.url().contains(WeChatConstants.URL_USER_INFO)) {
