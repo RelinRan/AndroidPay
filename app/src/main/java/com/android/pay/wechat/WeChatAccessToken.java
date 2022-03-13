@@ -2,8 +2,17 @@ package com.android.pay.wechat;
 
 import java.io.Serializable;
 
-public class WeChatAccessToken implements Serializable{
+public class WeChatAccessToken implements Serializable {
 
+    /**
+     * 错误代码
+     */
+    private int errcode = 0;
+    /**
+     * 错误信息
+     */
+    private String errmsg;
+    private String rid;
     /**
      * 接口调用凭证
      */
@@ -80,5 +89,29 @@ public class WeChatAccessToken implements Serializable{
 
     public String getExpires_in() {
         return expires_in;
+    }
+
+    public int getErrcode() {
+        return errcode;
+    }
+
+    public void setErrcode(int errcode) {
+        this.errcode = errcode;
+    }
+
+    public String getErrmsg() {
+        return errmsg;
+    }
+
+    public void setErrmsg(String errmsg) {
+        this.errmsg = errmsg;
+    }
+
+    public String getRid() {
+        return rid;
+    }
+
+    public void setRid(String rid) {
+        this.rid = rid;
     }
 }
