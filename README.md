@@ -13,7 +13,7 @@
 ## 软件架构
 Builder模式
 ## 使用说明
-### JitPack
+### Dependencies
 ./build.gradle | settings.gradle配置如下
 ```
 repositories {
@@ -28,7 +28,9 @@ dependencies {
 }
 ```
 #### ARR
-下载链接：[android_pay_2022.3.13.1.aar](https://github.com/RelinRan/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)
+国外GitHub：[android_pay_2022.3.13.1.aar](https://github.com/RelinRan/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)  
+国内Gitee：[android_pay_2022.3.13.1.aar](https://gitee.com/relin/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)  
+下载之后放入libs文件夹里面，然后./app/build.gradle配置如下  
 ```
 android {
     ....
@@ -39,9 +41,8 @@ android {
     }
 }
 dependencies {
-    implementation(name: 'AndroidPay', ext: 'aar')
+    implementation(name: 'android_pay_2022.3.13.1', ext: 'aar')
 }
-
 ```
 ## 微信支付
 项目包名下新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承WeChatPayActivity
