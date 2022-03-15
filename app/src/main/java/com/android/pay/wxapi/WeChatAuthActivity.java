@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.android.pay.net.Http;
-import com.android.pay.net.Json;
+import com.android.pay.net.JSON;
 import com.android.pay.net.OnHttpListener;
 import com.android.pay.net.RequestParams;
 import com.android.pay.net.Response;
@@ -22,9 +22,6 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 /**
  * 微信授权页面
- *
- * @author RelinRan
- * @Date 2019-11-15 01:50
  */
 public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, OnHttpListener {
 
@@ -37,14 +34,20 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        api = WXAPIFactory.createWXAPI(this, WeChatConstants.APP_ID, true);
+        Log.i(TAG, "[onCreate]");
+        api = WXAPIFactory.createWXAPI(this, WeChatConstants.APP_ID, false);
         api.registerApp(WeChatConstants.APP_ID);
-        api.handleIntent(getIntent(), this);
+        try {
+            api.handleIntent(getIntent(), this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        setIntent(intent);
         api.handleIntent(getIntent(), this);
     }
 
@@ -60,6 +63,10 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
         resp.toBundle(bundle);
         Log.i(TAG, "-[onResp]->type:" + type + ",code:" + resp.errCode + ",openId:" + resp.openId + ",bundle:" + bundle.toString());
         switch (resp.errCode) {
+            case BaseResp.ErrCode.ERR_BAN:
+                Log.i(TAG, "-[onResp]-> 运行参数与平台配置参数不一致");
+                sendMessage(WeChatConstants.FAILED, "参数与平台配置参数不一致");
+                break;
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
                 Log.i(TAG, "-[onResp]-> 拒绝授权微信登录");
                 sendMessage(WeChatConstants.AUTH_DENIED, "已拒绝授权微信登录");
@@ -144,15 +151,25 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
     @Override
     public void onHttpSucceed(Response result) {
         if (result.url().contains(WeChatConstants.URL_ACCESS_TOKEN)) {
-            accessToken = Json.parseJSONObject(WeChatAccessToken.class, result.body());
-            reqRefreshToken(WeChatConstants.APP_ID, accessToken.getRefresh_token());
+            accessToken = JSON.toObject(result.body(), WeChatAccessToken.class);
+            if (accessToken.getErrcode() == BaseResp.ErrCode.ERR_OK) {
+                reqRefreshToken(WeChatConstants.APP_ID, accessToken.getRefresh_token());
+            } else {
+                Log.i(TAG, "-[ACCESS_TOKEN]-> errorCode:" + accessToken.getErrcode()+",errorMsg:"+accessToken.getErrmsg());
+                sendMessage(WeChatConstants.FAILED,accessToken.getErrmsg());
+            }
         }
         if (result.url().contains(WeChatConstants.URL_REFRESH_TOKEN)) {
-            accessToken = Json.parseJSONObject(WeChatAccessToken.class, result.body());
-            reqUserInfo(accessToken.getAccess_token(), accessToken.getOpenid(), "zh-CN");
+            accessToken = JSON.toObject(result.body(), WeChatAccessToken.class);
+            if (accessToken.getErrcode() == BaseResp.ErrCode.ERR_OK) {
+                reqUserInfo(accessToken.getAccess_token(), accessToken.getOpenid(), "zh-CN");
+            } else {
+                Log.i(TAG, "-[REFRESH_TOKEN]-> errorCode:" + accessToken.getErrcode()+",errorMsg:"+accessToken.getErrmsg());
+                sendMessage(WeChatConstants.FAILED,accessToken.getErrmsg());
+            }
         }
         if (result.url().contains(WeChatConstants.URL_USER_INFO)) {
-            userInfo = Json.parseJSONObject(WeChatUser.class, result.body());
+            userInfo = JSON.toObject(result.body(), WeChatUser.class);
             Intent intent = new Intent(WeChatConstants.ACTION);
             intent.putExtra(WeChatConstants.ACCESS_TOKEN_INFO, accessToken);
             intent.putExtra(WeChatConstants.USER_INFO, userInfo);

@@ -1,30 +1,36 @@
 # AndroidPay
-#### 功能介绍
-##### 1.微信支付、登录、分享功能
-##### 2.支付宝支付、授权登录（极简版+完整版本）功能
-##### 3.银联支付功能
-#### 软件架构
-
-只要采用Builder模式
-#### 使用说明
-## 方法一  JitPack依赖
-##### A.在项目下的build.gradle配置如下
+[国外GitHub](https://github.com/RelinRan/AndroidPay)、[国内Gitee](https://gitee.com/relin/AndroidPay)
+## Fix-2022.3.13.1
+1.微信SDK更新到6.8.0，支持Android 11吊起微信。
+2.调整微信配置说明
+3.调整gradle为7.0.2
+4.调整JSON解析
+5.handleIntent新增异常捕捉
+## 功能介绍
+1.微信支付、登录、分享功能  
+2.支付宝支付、授权登录（极简版+完整版本）功能  
+3.银联支付功能  
+## 软件架构
+Builder模式
+## 使用说明
+### Dependencies
+./build.gradle | settings.gradle配置如下
 ```
-allprojects {
-	repositories {
-	    ...
-	    maven { url 'https://jitpack.io' }
-	}
+repositories {
+	 ...
+	 maven { url 'https://jitpack.io' }
 }
 ```
-##### B.在项目app文件夹下的build.gradle配置如下
+./app/build.gradle配置如下
 ```
 dependencies {
-	 implementation 'com.github.RelinRan:AndroidPay:1.0.11'
+	 implementation 'com.github.RelinRan:AndroidPay:2022.3.13.1'
 }
 ```
-## 方法二  ARR依赖
-[AndroidPay.arr](https://github.com/RelinRan/AndroidPay/blob/master/AndroidPay.aar)
+#### ARR
+国外GitHub：[android_pay_2022.3.13.1.aar](https://github.com/RelinRan/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)  
+国内Gitee：[android_pay_2022.3.13.1.aar](https://gitee.com/relin/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)  
+下载之后放入libs文件夹里面，然后./app/build.gradle配置如下  
 ```
 android {
     ....
@@ -35,16 +41,15 @@ android {
     }
 }
 dependencies {
-    implementation(name: 'AndroidPay', ext: 'aar')
+    implementation(name: 'android_pay_2022.3.13.1', ext: 'aar')
 }
-
 ```
-#### 1. 微信支付
-##### A.需要在项目新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承WeChatPayActivity
+## 微信支付
+项目包名下新建wxapi文件夹，然后新建WXPayEntryActivity.java文件,继承WeChatPayActivity
 ```
 public class WXPayEntryActivity extends WeChatPayActivity {}
 ```
-##### B.AndroidManifest.xml配置
+AndroidManifest.xml配置
 ```
 <activity
     android:name=".wxapi.WXPayEntryActivity"
@@ -53,7 +58,13 @@ public class WXPayEntryActivity extends WeChatPayActivity {}
     android:screenOrientation="portrait"
     android:theme="@style/Android.Theme.Light.NoActionBar" />
 ```
-##### C.支付调用
+manifest标签内（与权限同级）下配置
+```
+<queries>
+    <package android:name="com.tencent.mm" />
+</queries>
+```
+支付调用
 ```
 WeChatPay.Builder builder = new WeChatPay.Builder(this);
 builder.appId("xxxx");
@@ -81,17 +92,14 @@ builder.extData(xxxxx);//支付提示文字
 builder.build();
 ```
 
-#### 2. 支付宝支付
-##### A.AndroidManifest.xml配置
-##### AndroidManifest.xml非必要配置（项目本身或者其他arr没有配置org.apache.http.legacy的情况之下需要）：
+## 支付宝支付
+AndroidManifest.xml配置，非必要配置（项目本身或者其他arr没有配置org.apache.http.legacy的情况之下需要）
 ```
 <uses-library
     android:name="org.apache.http.legacy"
     android:required="false" />
 ```
-
-##### B.支付调用
-
+支付调用
 ```
 AliPay.Builder builder = new AliPay.Builder(this);
 builder.orderInfo("xxxx");
@@ -137,32 +145,35 @@ public void onAliPay(String status, String json, String description) {
 builder.loading(true);
 builder.build();
 ```
-
-####  3.银联支付
-
+## 银联支付
 ```
 UUPay uuPay = new UUPay(this);
 uuPay.pay(tn,UUPay.PayMode.FORM);
 ```
 
-####  4.微信登录
-##### A.需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承WeChatAuthActivity
+## 微信登录
+项目包名下新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承WeChatAuthActivity
 ```
-public class WXEntryActivity extends WeChatAuthActivity {
-
-}
+public class WXEntryActivity extends WeChatAuthActivity {}
 ```
-##### B.AndroidManifest.xml配置
-
+AndroidManifest.xml配置
 ```
 <activity
      android:name=".wxapi.WXEntryActivity"
      android:configChanges="keyboardHidden|orientation|screenSize"
      android:exported="true"
+     android:taskAffinity="填写你的包名"
+     android:launchMode="singleTask"
      android:theme="@android:style/Theme.Translucent.NoTitleBar">
 </activity>
 ```
-##### C.微信登录代码
+manifest标签内（与权限同级）下配置
+```
+<queries>
+    <package android:name="com.tencent.mm" />
+</queries>
+```
+微信登录
 ```
 WeChatLogin.Builder builder = new WeChatLogin.Builder(context);
 builder.appId("xxx");
@@ -186,16 +197,16 @@ builder.listener(new OnWXLoginListener() {
 });
 builder.build();
 ```
-####  5.支付宝登录（[官方文档](https://docs.open.alipay.com/218/)）
-##### 授权登录回调onAliLogin（int code, String memo, AliUser aliUser）回调返回code值如下：
-1. AliLogin.OK = 9000 (调用成功)
-2. AliLogin.Duplex = 5000 (3s内快速发起了多次支付 / 授权调用。稍后重试即可。)
-3. AliLogin.NOT_INSTALLED = 4001（用户未安装支付宝 App。）
-4. AliLogin.SYS_ERR = 4000（其它错误，如参数传递错误。）
-5. AliLogin.CANCEL = 6001（用户取消）
-6. AliLogin.NET_ERROR = 6002（网络连接出错）
-#####  1.极简版授权([官方文档](https://docs.open.alipay.com/218/sxc60m/))
-##### A.在项目AndroidManifest.xml配置如下（注意：<data android:scheme="xxxxxxxxxx"/>这个需要自己配置，最好是自己应用包名）
+##  支付宝登录（[官方文档](https://docs.open.alipay.com/218/)）
+授权登录回调onAliLogin（int code, String memo, AliUser aliUser）回调返回code值如下：  
+AliLogin.OK = 9000 (调用成功)  
+AliLogin.Duplex = 5000 (3s内快速发起了多次支付 / 授权调用。稍后重试即可。)  
+AliLogin.NOT_INSTALLED = 4001（用户未安装支付宝 App。）  
+AliLogin.SYS_ERR = 4000（其它错误，如参数传递错误。）  
+AliLogin.CANCEL = 6001（用户取消）  
+AliLogin.NET_ERROR = 6002（网络连接出错）  
+###  极简版授权([官方文档](https://docs.open.alipay.com/218/sxc60m/))
+在项目AndroidManifest.xml配置如下（注意：android:scheme="xxxxxxxxxx"这个需要自己配置，最好是自己应用包名）
 ```
 <activity android:name="com.alipay.sdk.app.AlipayResultActivity" tools:node="merge">
     <intent-filter tools:node="replace">
@@ -206,7 +217,7 @@ builder.build();
     </intent-filter>
 </activity>
 ```
-##### B.支付宝登录代码
+支付宝登录代码
 ```
 AliLogin.Builder builder = new AliLogin.Builder(this);
 builder.appId("xxxxx");
@@ -221,8 +232,8 @@ builder.listener(new OnAliLoginListener() {
 });
 builder.build();
 ```
-#####  2.完整版授权（[官方文档](https://docs.open.alipay.com/218/105325/)）
-##### A.注意：authInfo需要后端提供，为了安全性。如果后端不提供就是调用OrderInfoUtil工具类如下方法获取
+### 完整版授权（[官方文档](https://docs.open.alipay.com/218/105325/)）
+注意：authInfo需要后端提供，为了安全性。如果后端不提供就是调用OrderInfoUtil工具类如下方法获取
 ```
 /**
 * 构建授权信息
@@ -236,7 +247,7 @@ builder.build();
 */
 public static String buildAuthInfo(String privateKey, String pid, String app_id, String target_id, boolean rsa2)
 ```
-##### B.授权AndroidManifest.xml配置
+授权AndroidManifest.xml配置
 ```
 <activity
     android:name="com.alipay.sdk.app.H5AuthActivity"
@@ -251,7 +262,7 @@ public static String buildAuthInfo(String privateKey, String pid, String app_id,
     android:windowSoftInputMode="adjustResize|stateHidden" >
 </activity>
 ```
-##### C.授权调用代码
+授权调用代码
 ```
 AliLogin.Builder builder = new AliLogin.Builder(this);
 builder.authInfo("xxxxx");
@@ -265,16 +276,13 @@ builder.listener(new OnAliLoginListener() {
 });
 builder.build();
 ```
-####  6.微信分享
-##### A.需要在项目新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承WeChatAuthActivity
+## 微信分享
+项目包名下新建wxapi文件夹，然后新建WXEntryActivity.java文件,继承WeChatAuthActivity
 ```
 public class WXEntryActivity extends WeChatAuthActivity {}
 ```
-##### B.微信分享代码
-因为根据官方文档集成，其中参数名字也跟官方文档一致，目前只是加了一个thumUrl和imageUrl不跟官方文档一致，为了方便缩略图和图片分享使用网络图片;
-其他的参数参考[官方文档](https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Share_and_Favorites/Android.html)
-
-###### B-1.图片分享代码
+因为根据官方文档集成，其中参数名字也跟官方文档一致，目前只是加了一个thumUrl和imageUrl不跟官方文档一致，为了方便缩略图和图片分享使用网络图片; 其他的参数参考[官方文档](https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Share_and_Favorites/Android.html)
+### 图片分享代码
 ```
 WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
 builder.type(WeChatShare.TYPE_IMAGE);
@@ -290,7 +298,7 @@ builder.listener(new OnWeChatShareListener() {
 builder.build();
 ```
 
-###### B-2.视频分享代码
+### 视频分享代码
 ```
 WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
 builder.type(WeChatShare.TYPE_VIDEO);
@@ -315,7 +323,7 @@ builder.listener(new OnWeChatShareListener() {
 builder.build();
 ```
 
-###### B-3.网页分享代码
+### 网页分享代码
 ```
 WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
 builder.type(WeChatShare.TYPE_WEB);
@@ -340,7 +348,7 @@ builder.listener(new OnWeChatShareListener() {
 });
 builder.build();
 ```
-###### B-4.音乐分享代码
+### 音乐分享代码
 ```
 WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
 builder.type(WeChatShare.TYPE_MUSIC);
