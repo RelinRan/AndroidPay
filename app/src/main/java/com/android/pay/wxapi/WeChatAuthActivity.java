@@ -86,6 +86,10 @@ public class WeChatAuthActivity extends Activity implements IWXAPIEventHandler, 
                     Log.i(TAG, "-[onResp]-> 用户分享结束");
                     sendMessage(WeChatConstants.SUCCEED, "分享成功");
                 }
+                if (type == WeChatConstants.MINI_PROGRAM_LAUNCHER) {
+                    Log.i(TAG, "-[onResp]-> 微信小程序打开APP");
+                    sendMessage(WeChatConstants.SUCCEED, "微信小程序打开APP");
+                }
                 break;
         }
         finish();

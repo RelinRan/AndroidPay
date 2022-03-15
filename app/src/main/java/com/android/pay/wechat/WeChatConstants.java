@@ -1,5 +1,6 @@
 package com.android.pay.wechat;
 
+import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
 
 /**
@@ -60,12 +61,16 @@ public class WeChatConstants {
     /**
      * 微信登录
      */
-    public static final int LOGIN = 1;
+    public static final int LOGIN = ConstantsAPI.COMMAND_SENDAUTH;
 
     /**
      * 微信分享
      */
-    public static final int SHARE = 2;
+    public static final int SHARE = ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX;;
+    /**
+     *
+     */
+    public static final int MINI_PROGRAM_LAUNCHER = 19;;
 
     /**
      * 成功
