@@ -373,3 +373,35 @@ builder.listener(new OnWeChatShareListener() {
 });
 builder.build();
 ```
+### 小程序分享代码
+```
+WeChatShare.Builder builder = new WeChatShare.Builder(getContext());
+builder.type(WeChatShare.TYPE_MIN_PROGRAM);
+builder.appId(Constants.WE_CHAT_APP_ID);
+builder.scene(WeChatShare.SCENE_SESSION);
+//兼容低版本的网页链接
+builder.webpageUrl("http://www.qq.com");
+//正式版:0，测试版:1，体验版:2
+builder.miniProgramType(WXMiniProgramObject.MINIPTOGRAM_TYPE_RELEASE);
+//小程序原始id
+builder.miniProgramUserName("gh_d43f693ca31f");
+//小程序页面路径
+builder.miniProgramPath("/pages/media");
+builder.title("标题");
+builder.description("描述信息");
+//缩略图设置
+builder.thumbImage(bitmap);//或 builder.thumbUrl("http://xxxxxx"); 或builder.thumbData(byte[]);
+builder.listener(new OnWeChatShareListener() {
+    @Override
+    public void onWeChatShare(int code, String msg) {
+        //分享回调，官方目前取消了回调，不管是否正确分享都会进入。
+        if (code==WeChatConstants.SUCCEED){//成功
+
+        }
+        if (code==WeChatConstants.CANCEL){//取消
+
+        }
+    }
+});
+builder.build();
+```

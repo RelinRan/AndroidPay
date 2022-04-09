@@ -1,6 +1,8 @@
 package com.android.pay.wechat;
 
+import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
+import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject;
 
 /**
  * 微信常量</br>
@@ -52,6 +54,10 @@ public class WeChatConstants {
      */
     public static final int LOADING = BaseResp.ErrCode.ERR_OK;
     /**
+     * 微信打开小程序
+     */
+    public static final int MINI_PROGRAM_LAUNCHER = ConstantsAPI.COMMAND_LAUNCH_WX_MINIPROGRAM;
+    /**
      * 微信登录
      */
     public static final int LOGIN = 1;
@@ -83,5 +89,6 @@ public class WeChatConstants {
      * 授权信息
      */
     public static final String ACCESS_TOKEN_INFO = "access_token_info";
+
 
 }

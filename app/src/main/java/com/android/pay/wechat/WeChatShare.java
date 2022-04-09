@@ -13,6 +13,7 @@ import com.android.pay.R;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXImageObject;
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject;
 import com.tencent.mm.opensdk.modelmsg.WXMusicObject;
 import com.tencent.mm.opensdk.modelmsg.WXTextObject;
 import com.tencent.mm.opensdk.modelmsg.WXVideoObject;
@@ -60,6 +61,10 @@ public class WeChatShare {
      * 网页
      */
     public static final int TYPE_WEB = 0x050;
+    /**
+     * 小程序
+     */
+    public static final int TYPE_MIN_PROGRAM = 0x060;
 
     /**
      * 微信api对象
@@ -169,6 +174,19 @@ public class WeChatShare {
     public final String webpageUrl;
 
     /**
+     * 小程序，正式版:0，测试版:1，体验版:2
+     */
+    public final int miniProgramType;
+    /**
+     * 小程序原始id
+     */
+    public final String miniProgramUserName;
+    /**
+     * 小程序页面路径；对于小游戏，可以只传入 query 部分，来实现传参效果，如：传入 "?foo=bar"
+     */
+    public final String miniProgramPath;
+
+    /**
      * 分享回调函数
      */
     public final OnWeChatShareListener listener;
@@ -207,6 +225,9 @@ public class WeChatShare {
         this.videoLowBandUrl = builder.videoLowBandUrl;
         this.webpageUrl = builder.webpageUrl;
         this.listener = builder.listener;
+        this.miniProgramType = builder.miniProgramType;
+        this.miniProgramUserName = builder.miniProgramUserName;
+        this.miniProgramPath = builder.miniProgramPath;
         this.type = builder.type;
         share();
     }
@@ -325,6 +346,19 @@ public class WeChatShare {
          * 分享类型(默认Web)
          */
         private int type = TYPE_WEB;
+
+        /**
+         * 小程序，正式版:0，测试版:1，体验版:2
+         */
+        public  int miniProgramType = 1;
+        /**
+         * 小程序原始id
+         */
+        public  String miniProgramUserName;
+        /**
+         * 小程序页面路径；对于小游戏，可以只传入 query 部分，来实现传参效果，如：传入 "?foo=bar"
+         */
+        public  String miniProgramPath ;
 
         /**
          * 分享构建者
@@ -737,6 +771,60 @@ public class WeChatShare {
         }
 
         /**
+         * @return 小程序：正式版:0，测试版:1，体验版:2
+         */
+        public int getMiniProgramType() {
+            return type;
+        }
+
+        /**
+         * 小程序：正式版:0，测试版:1，体验版:2
+         *
+         * @param miniProgramType 正式版:0，测试版:1，体验版:2
+         * @return
+         */
+        public Builder miniProgramType(int miniProgramType) {
+            this.miniProgramType = miniProgramType;
+            return this;
+        }
+
+        /**
+         * @return 小程序原始id
+         */
+        public String getMiniProgramUserName() {
+            return miniProgramUserName;
+        }
+
+        /**
+         * 小程序,小程序原始id
+         *
+         * @param miniProgramUserName 小程序原始id
+         * @return
+         */
+        public Builder miniProgramUserName(String miniProgramUserName) {
+            this.miniProgramUserName = miniProgramUserName;
+            return this;
+        }
+
+        /**
+         * @return 小程序页面路径；对于小游戏，可以只传入 query 部分，来实现传参效果，如：传入 "?foo=bar"
+         */
+        public String getMiniProgramPath() {
+            return miniProgramPath;
+        }
+
+        /**
+         * 小程序页面路径；对于小游戏，可以只传入 query 部分，来实现传参效果，如：传入 "?foo=bar"
+         *
+         * @param miniProgramPath 小程序原始id
+         * @return
+         */
+        public Builder miniProgramPath(String miniProgramPath) {
+            this.miniProgramPath = miniProgramPath;
+            return this;
+        }
+
+        /**
          * 构建分享对象进行分享
          *
          * @return
@@ -751,13 +839,13 @@ public class WeChatShare {
      * 分享
      */
     private void share() {
-        if (context instanceof Activity){
+        if (context instanceof Activity) {
             Activity activity = (Activity) context;
-            if (activity.isFinishing()){
+            if (activity.isFinishing()) {
                 return;
             }
         }
-        if (receiver!=null){
+        if (receiver != null) {
             context.unregisterReceiver(receiver);
             receiver = null;
         }
@@ -792,6 +880,9 @@ public class WeChatShare {
         }
         if (type == TYPE_WEB) {
             shareWebPage();
+        }
+        if (type == TYPE_MIN_PROGRAM) {
+            shareMiniProgram();
         }
     }
 
@@ -933,6 +1024,31 @@ public class WeChatShare {
             msg.thumbData = thumbData;
         }
         shareMessage("webpage" + System.currentTimeMillis(), msg, scene, "");
+    }
+
+    /**
+     * 分享小程序
+     */
+    private void shareMiniProgram() {
+        if (webpageUrl == null) {
+            return;
+        }
+        WXMiniProgramObject miniProgramObject = new WXMiniProgramObject();
+        miniProgramObject.webpageUrl = webpageUrl;
+        miniProgramObject.miniprogramType = miniProgramType;
+        miniProgramObject.userName = miniProgramUserName;
+        miniProgramObject.path = miniProgramPath;
+        WXMediaMessage msg = new WXMediaMessage(miniProgramObject);
+        msg.title = title;
+        msg.description = description;
+        if (thumbImage != null) {
+            Bitmap bitmap = Bitmap.createScaledBitmap(thumbImage, thumbSize, thumbSize, true);
+            msg.thumbData = ShareHelper.decodeBitmap(bitmap);
+        }
+        if (thumbData != null && thumbData.length != 0) {
+            msg.thumbData = thumbData;
+        }
+        shareMessage("miniProgram" + System.currentTimeMillis(), msg, scene, "");
     }
 
     /**
