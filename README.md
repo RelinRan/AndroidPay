@@ -1,5 +1,4 @@
 # AndroidPay
-[国外GitHub](https://github.com/RelinRan/AndroidPay)、[国内Gitee](https://gitee.com/relin/AndroidPay)
 ## Fix-2022.3.13.1
 1.微信SDK更新到6.8.0，支持Android 11吊起微信。
 2.调整微信配置说明
@@ -12,6 +11,13 @@
 3.银联支付功能  
 ## 软件架构
 Builder模式
+# 资源
+|名字|资源|
+|-|-|
+|GitHub-AAR|[android_pay.aar](https://github.com/RelinRan/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)|
+|Gitee-AAR|[android_pay.aar](https://gitee.com/relin/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)|
+|GitHub |[AndroidPay](https://github.com/RelinRan/AndroidPay)|
+|Gitee|[AndroidPay](https://gitee.com/relin/AndroidPay)|
 ## 使用说明
 ### Dependencies
 ./build.gradle | settings.gradle配置如下
@@ -28,8 +34,6 @@ dependencies {
 }
 ```
 #### ARR
-国外GitHub：[android_pay_2022.3.13.1.aar](https://github.com/RelinRan/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)  
-国内Gitee：[android_pay_2022.3.13.1.aar](https://gitee.com/relin/AndroidPay/blob/master/android_pay_2022.3.13.1.aar)  
 下载之后放入libs文件夹里面，然后./app/build.gradle配置如下  
 ```
 android {
